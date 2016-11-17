@@ -1,5 +1,3 @@
-/* NOTE: THIS MODULE NEEDS A MAJOR OVERHAUL */
-
 module datapath(
 	input  					clock,				//CLOCK 								CLOCK_50
 	input 					reset,				//RESET								SW[9]
@@ -13,8 +11,8 @@ module datapath(
 	input						right,				//MOVE RIGHT SIGNAL				FROM CONTROL
 	input						draw,					//DRAW SIGNAL						FROM CONTROL 
 	
-	output reg		[8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
-	output reg 		[7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
+	output reg		[7:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
+	output reg 		[6:0] y_position,			//POSITION COORDINATE Y			FOR VGA
 
 	output reg  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
 	output reg				idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
@@ -23,14 +21,15 @@ module datapath(
 	output reg  			draw_done			//DRAW DONE SIGNAL				FOr CONTROL
 	);
 	
-	/*** from now on this is going to be our main datapath module that links all
-		 the smaller logic and interaction modules such as
-		 link_char, enemy, map_HUD, collision_detector ***/
+//	reg		[]	init_count;
+//	reg		[]	attack_count;
+//	reg		[] move_count;
+//	reg 		[] draw_count;
 	
-	/* initializing registers might not work
-	 * so resetting in init block would be
-	 * better just to be sure */
-	/* I'm removing all the initilizations */
+	
+	//initialize all registers
+	initial x_position	= 8'b0;
+	initial y_position	= 7'b0;
 	
 	initial init_done 	= 1'b0;
 	initial attack_done 	= 1'b0;
