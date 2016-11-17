@@ -1,3 +1,5 @@
+/* NOTE: THIS MODULE NEEDS A MAJOR OVERHAUL */
+
 module control(
 	input				clock, 			//CLOCK 								CLOCK_50
 	input				reset,			//RESET								SW[9]
