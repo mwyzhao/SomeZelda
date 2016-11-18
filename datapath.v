@@ -38,6 +38,10 @@ module datapath
 	wire link_y_pos;
 	wire link_d_done;
 
+	/** parameters **/
+	parameter 	LINK_INITIAL_X = your number here;
+	parameter 	LINK_INITIAL_Y = your number here;
+
 	/** module declarations go here **/
 
 	link_char p(
@@ -136,6 +140,8 @@ module datapath
 		begin
 		//set all initial states here, ie. set character location to initial
 		//basically does the same thing as reset but in very beginning doesnt need to reset
+			x_position <= LINK_INITIAL_X;
+			y_position <= LINK_INITIAL_Y;
 		end
 		
 		else if(idle)
