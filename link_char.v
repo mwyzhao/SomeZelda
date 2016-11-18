@@ -6,7 +6,7 @@ module link_char(
 	input clock,
 	input reset,
 
-	//state signal from control
+	//state signals from control
 	input 				init,
 	input 				idle,
 	input 				attack,
@@ -21,7 +21,7 @@ module link_char(
 	output reg 	  [7:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
 
-	//output finished signal
+	//output finished signals
 	output reg 			draw_done,
 
 	//output write enable to VGA (do we need this?)
