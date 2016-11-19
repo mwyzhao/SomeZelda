@@ -26,16 +26,11 @@ module datapath
 		output 		  			draw_done,			//DRAW DONE SIGNAL				FOR CONTROL
 	);
 	
-	/*** from now on this is going to be our main datapath module that links all
-		 the smaller logic and interaction modules such as
-		 link_char, enemy, map_HUD, collision_detector ***/
-	
-	/* initializing registers might not work
-	 * so resetting in init block would be
-	 * better just to be sure */
-	/* I'm removing all the initilizations */
+	/** parameters **/
+	localparam 		ON 		= 1'b1;
+					OFF 	= 1'b0;
 
-	/** wire and register delcarations go here **/
+	/** wire and register declarations go here **/
 	//vga enable
 	wire enable;
 
@@ -48,9 +43,26 @@ module datapath
 	assign x_position = {0,link_x_pos};
 	assign y_position = {0,link_y_pos};
 
-	/** parameters **/
-
 	/** module declarations go here **/
+
+	/*
+	map M(
+		.clock 			(clock),
+		.reset 			(reset),
+
+		//enable signal
+		.draw_map 		(),
+
+		//map select
+		//.map_s 		(),
+
+		//map/HUD output finished signals
+		.draw_map_done 	(),
+		.draw_HUD_done 	(),
+
+		//VGA write enable
+		.VGA_write 		());
+	*/
 
 	link_char p(
 		.clock 			(clock),
@@ -87,30 +99,6 @@ module datapath
 	enemy e2();
 
 	enemy e3();
-	*/
-
-	/*
-	map_HUD mH(
-		.clock 			(clock),
-		.reset 			(reset),
-
-		//enable signals
-		.draw_map 		(),
-		.draw_HUD 		(),
-
-		//map select
-		//.map_s 		(),
-
-		//map/HUD position coord for VGA
-		.map_HUD_x_pos 	(),
-		.map_HUD_y_pos 	(),
-
-		//map/HUD output finished signals
-		.draw_map_done 	(),
-		.draw_HUD_done 	(),
-
-		//VGA write enable
-		.VGA_write 		());
 	*/
 
 	/* NOTE: could potentially use one more basic module
