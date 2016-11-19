@@ -47,7 +47,7 @@ module link_char(
 	*/
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
-	reg [2:0] spriteColor;
+	reg [5:0] spriteColor;
 	/** position registers for player character link **/
 	
 	//link_pos is the x,y coord of link's character sprite (top left corner of image)
@@ -102,6 +102,8 @@ module link_char(
 			direction 	<= UP;
 			y_pos 		<= y_pos - 1'b1;
 			facing 		<= UP;
+			spriteAddressX <= 32;
+			spriteAddressY <= 0;
 		end
 		else if(move_down)
 		begin
@@ -109,6 +111,8 @@ module link_char(
 			direction 	<= DOWN;
 			y_pos 		<= y_pos + 1'b1;
 			facing 		<= DOWN;
+			spriteAddressX <= 0;
+			spriteAddressY <= 0;
 		end
 		else if(move_left)
 		begin
@@ -116,6 +120,8 @@ module link_char(
 			direction 	<= LEFT;
 			x_pos 		<= x_pos - 1'b1;
 			facing 		<= LEFT;
+			spriteAddressX <= 16;
+			spriteAddressY <= 0;
 		end
 		else if(move_right)
 		begin
@@ -123,31 +129,20 @@ module link_char(
 			direction 	<= RIGHT;
 			x_pos 		<= x_pos + 1'b1;
 			facing 		<= RIGHT;
+			spriteAddressX <= 48;
+			spriteAddressY <= 0;
 		end
 		else if(draw_char)
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
-			if (facing == DOWN) begin
-				spriteAddressX <= 0;
-				spriteAddressY <= 0;
-			end
-			else if (facing == LEFT) begin
-				spriteAddressX <= 16;
-				spriteAddressY <= 0;
-			end
-			else if (facing == UP) begin
-				spriteAddressX <= 32;
-				spriteAddressY <= 0;
-			end
-			else if (facing == RIGHT) begin
-				spriteAddressX <= 48;
-				spriteAddressY <= 0;
-			end
 			
-			if(spriteColor != 0)
-				VGA_write <=1;
+			
+			if(spriteColor == 6'b111111)
+				VGA_write <=OFF;
 			else 
-				VGA_write <=0;
+				VGA_write <=ON;
+
+				
 			spriteAddressX <= spriteAddressX + [3:0] count;
 			spriteAddressY <= spriteAddressY + [7:4] count;
 			//increment x and y positions

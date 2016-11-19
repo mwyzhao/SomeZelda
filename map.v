@@ -40,10 +40,10 @@ module map(
 	);
 
 	/** parameters **/
-	localparam 		MAX_COUNT 	= 16'b1011_0000_0000_0000 		//number of pixels in 256x176
-					MAX_X 		= 8'b1010_1111 					//176 - 1
+	localparam 		MAX_COUNT 	= 16'b1011_0000_0000_0000, 		//number of pixels in 256x176
+					MAX_X 		= 8'b1010_1111,					//176 - 1
 					ON 			= 1'b1,
-					OFF 		= 1'b0;a
+					OFF 		= 1'b0;
 
 	/** memory modules **/
 	map_mem map1(
@@ -58,6 +58,7 @@ module map(
 		.clock 			(clock),
 		.q 				(colour)
 		);
+	*/
 
 	/** register declaractions **/
 	//registers to signal position of memory to alter redrawing
