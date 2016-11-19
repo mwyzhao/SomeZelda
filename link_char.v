@@ -25,7 +25,7 @@ module link_char(
 	output reg 			draw_done,
 
 	//output write enable to VGA (do we need this?)
-	output reg 			VGA_write
+	output  			VGA_write
 	);
 
 	/** local parameters **/
@@ -47,7 +47,9 @@ module link_char(
 	*/
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
-	reg [5:0] spriteColor;
+	reg [5:0] intAddressX;
+	reg [3:0] intAddressY;
+	wire [5:0] spriteColor;
 	/** position registers for player character link **/
 	
 	//link_pos is the x,y coord of link's character sprite (top left corner of image)
@@ -61,6 +63,7 @@ module link_char(
 	//counter for when link is finished drawing
 	reg 	[5:0] count;
 	reg [1:0] facing;
+	assign VGA_write = (draw_char)&&(spriteColor!=6'b111111);
 	always@(posedge clock)
 	begin
 		if(reset)
@@ -102,8 +105,8 @@ module link_char(
 			direction 	<= UP;
 			y_pos 		<= y_pos - 1'b1;
 			facing 		<= UP;
-			spriteAddressX <= 32;
-			spriteAddressY <= 0;
+			intAddressX <= 32;
+			intAddressY <= 0;
 		end
 		else if(move_down)
 		begin
@@ -111,8 +114,8 @@ module link_char(
 			direction 	<= DOWN;
 			y_pos 		<= y_pos + 1'b1;
 			facing 		<= DOWN;
-			spriteAddressX <= 0;
-			spriteAddressY <= 0;
+			intAddressX  <= 0;
+			intAddressY <= 0;
 		end
 		else if(move_left)
 		begin
@@ -120,8 +123,8 @@ module link_char(
 			direction 	<= LEFT;
 			x_pos 		<= x_pos - 1'b1;
 			facing 		<= LEFT;
-			spriteAddressX <= 16;
-			spriteAddressY <= 0;
+			intAddressX  <= 16;
+			intAddressY <= 0;
 		end
 		else if(move_right)
 		begin
@@ -129,22 +132,17 @@ module link_char(
 			direction 	<= RIGHT;
 			x_pos 		<= x_pos + 1'b1;
 			facing 		<= RIGHT;
-			spriteAddressX <= 48;
-			spriteAddressY <= 0;
+			intAddressX  <= 48;
+			intAddressY <= 0;
 		end
 		else if(draw_char)
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
 			
 			
-			if(spriteColor == 6'b111111)
-				VGA_write <=OFF;
-			else 
-				VGA_write <=ON;
-
 				
-			spriteAddressX <= spriteAddressX + [3:0] count;
-			spriteAddressY <= spriteAddressY + [7:4] count;
+			spriteAddressX <= intAddressX + [3:0] count;
+			spriteAddressY <= intAddressY + [7:4] count;
 			//increment x and y positions
 			link_x_draw <= x_pos + [3:0] count;
 			link_y_draw <= y_pos + [7:4] count;
@@ -165,7 +163,7 @@ module link_char(
 		end
 		else
 		begin
-			//default
+			draw_done <=false;
 		end
 	end
 
