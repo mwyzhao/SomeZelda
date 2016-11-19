@@ -28,7 +28,7 @@ module control(
 
 	reg [4:0] current_state, next_state;
 
-	//State list
+	//State list and parameters
 	localparam 		S_INIT 				= 3'b000,
 					S_IDLE				= 3'b001,
 					S_ATTACK	 		= 3'b010,
