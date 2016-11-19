@@ -14,14 +14,16 @@ module datapath
 		input					right,				//MOVE RIGHT SIGNAL				FROM CONTROL
 		input					draw,				//DRAW SIGNAL					FROM CONTROL 
 		
-		output reg		  [8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
-		output reg 		  [7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
+		output 			  [8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
+		output  		  [7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
+		output 					VGA_enable			//WRITE ENABLE SIGNAL 			FOR VGA
 
-		output reg  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
-		output reg				idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
-		output reg  			attack_done,		//ATTACK DONE SIGNAL 			FOR CONTROL
-		output reg  			move_done,			//MOVE DONE SIGNAL 				FOR CONTROL
-		output reg  			draw_done			//DRAW DONE SIGNAL				FOr CONTROL
+		//probably don't need the commented out signals
+		//output	  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
+		//output				idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
+		//output	  			attack_done,		//ATTACK DONE SIGNAL 			FOR CONTROL
+		//output 	  			move_done,			//MOVE DONE SIGNAL 				FOR CONTROL
+		output 		  			draw_done,			//DRAW DONE SIGNAL				FOR CONTROL
 	);
 	
 	/*** from now on this is going to be our main datapath module that links all
@@ -34,9 +36,19 @@ module datapath
 	/* I'm removing all the initilizations */
 
 	/** wire and register delcarations go here **/
+	//vga enable
+	wire enable;
+
+	//character signal wires
 	wire link_x_pos;
 	wire link_y_pos;
 	wire link_d_done;
+	wire link_draw;
+
+	assign x_position = {0,link_x_pos};
+	assign y_position = {0,link_y_pos};
+
+	/** parameters **/
 
 	/** module declarations go here **/
 
@@ -45,7 +57,14 @@ module datapath
 		.reset 			(reset),
 
 		//enable signal
-		.move_char 		(),
+		.init 			(init),
+		.idle 			(idle),
+		.attack 		(attack),
+		.move_up 		(up),
+		.move_down 		(down),
+		.move_left 		(left),
+		.move_right 	(right),
+		.draw_char 		(draw),
 
 		//collision signal
 		/* how would this work?
@@ -53,14 +72,14 @@ module datapath
 		*/
 
 		//link position coord for VGA
-		.link_x_pos 	(link_x_pos),
-		.link_y_pos 	(link_y_pos),
+		.link_x_draw 	(link_x_pos),
+		.link_y_draw 	(link_y_pos),
 
 		//link output finished signal
-		.draw_done 		(link_d_done),
+		.draw_done 		(draw_done), 	//change this later
 
 		//VGA write enable
-		.VGA_write 		());
+		.VGA_write 		(VGA_enable)); 	//change this as well
 
 	/* not used for now
 	enemy e1();
@@ -70,6 +89,7 @@ module datapath
 	enemy e3();
 	*/
 
+	/*
 	map_HUD mH(
 		.clock 			(clock),
 		.reset 			(reset),
@@ -91,11 +111,13 @@ module datapath
 
 		//VGA write enable
 		.VGA_write 		());
+	*/
 
 	/* NOTE: could potentially use one more basic module
 	 * to make this more scalable.
 	 * also need to look into exactly how this is
 	 * going to work. */
+	/*
 	collision_detector cd(
 		.clock 			(clock),
 		.reset 			(reset),
@@ -122,8 +144,10 @@ module datapath
 		e1_e2_collision 	(),
 	 	c_attack_e1 		(),
 		c_attack_e2 		());
+	*/
 
-	//always block for init
+	//logic for multiplexing different outputs to vga and control
+	/*
 	always@(posedge clock)
 	begin
 		if(reset)
@@ -136,6 +160,8 @@ module datapath
 		begin
 		//set all initial states here, ie. set character location to initial
 		//basically does the same thing as reset but in very beginning doesnt need to reset
+			x_position <= LINK_INITIAL_X;
+			y_position <= LINK_INITIAL_Y;
 		end
 		
 		else if(idle)
@@ -176,5 +202,6 @@ module datapath
 		//draws entire background and then sprite
 		end
 	end
+	*/
 
 endmodule
