@@ -22,7 +22,7 @@ module datapath
 
 		//probably don't need the commented out signals
 		//output	  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
-		//output				idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
+		output					idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
 		//output	  			attack_done,		//ATTACK DONE SIGNAL 			FOR CONTROL
 		//output 	  			move_done,			//MOVE DONE SIGNAL 				FOR CONTROL
 		output 		  			draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
@@ -30,8 +30,9 @@ module datapath
 	);
 	
 	/** parameters **/
-	localparam 		ON 		= 1'b1,
-						OFF 	= 1'b0;
+	localparam 		MAX_FRAME_COUNT = 21'd1000000; 	//count for for 50 fps 50MHz/50
+					ON 		= 1'b1,
+					OFF 	= 1'b0;
 
 	/** wire and register declarations go here **/
 	//map signal wires
@@ -47,6 +48,10 @@ module datapath
 	wire [5:0] link_colour;
 	wire link_draw_done;
 	wire link_write;
+
+	//frame counter limits actions to 50Hz
+	//21 bits for overflow safety
+	reg  [20:0] frame_counter;
 
 	/** module declarations go here **/
 	map M(
@@ -99,10 +104,10 @@ module datapath
 		.cout 			(link_colour),
 
 		//link output finished signal
-		.draw_done 		(draw_link_done), 	//change this later
+		.draw_done 		(draw_link_done),
 
 		//VGA write enable
-		.VGA_write 		(link_write)); 	//change this as well
+		.VGA_write 		(link_write));
 
 	/* not used for now
 	enemy e1();
@@ -148,13 +153,10 @@ module datapath
 	/** combinational logic **/
 	always@(*)
 	begin
-		if(reset)
-		begin
-			x_position 	= 9'b0;
-			y_position 	= 8'b0;
-			colour 		= 6'b0;
-			VGA_enable 	= OFF;
-		end
+		/* this combinational always block multiplexes the correct
+		   outputs to the VGA for the draw states defined in control */
+
+		//draw map state
 		else if((draw_map) && (!draw_map_done))
 		begin
 			x_position 	= map_x_pos;
@@ -163,6 +165,7 @@ module datapath
 			VGA_enable 	= map_write;
 		end
 
+		//draw link state
 		else if((draw_link)&&(!draw_link_done))
 		begin
 			x_position 	= link_x_pos;
@@ -170,7 +173,15 @@ module datapath
 			colour 		= link_colour;
 			VGA_enable 	= link_write;
 		end
-		else //default
+
+		//draw enemies state
+		else if((draw_enemies) && (!draw_enemies_done))
+		begin
+
+		end
+
+		//default
+		else
 		begin
 			x_position 	= 9'b0;
 			y_position 	= 8'b0;
@@ -179,10 +190,48 @@ module datapath
 		end
 	end
 
-	//logic for multiplexing different outputs to vga and control
-	/*
+	//sequential logic
 	always@(posedge clock)
 	begin
+		//synchronous reset
+		if(reset)
+		begin
+			x_position 		<= 9'b0;
+			y_position 		<= 8'b0;
+			colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+			idle_done 		<= OFF;
+			frame_counter 	<= 21'b0;
+		end
+
+		//initialize registers
+		else if(init)
+		begin
+			x_position 		<= 9'b0;
+			y_position 		<= 8'b0;
+			colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+			idle_done 		<= OFF;
+			frame_counter 	<= 21'b0;
+		end
+
+		//once idle state is reached, 
+		if(idle)
+		begin
+			//the '>' is safety in case draw takes too much time
+			if(frame_counter > MAX_FRAME_COUNT)
+			begin
+				idle_done 		<= ON;
+				frame_counter 	<= 21'b0;
+			end
+		end
+		
+		//always increment counter and set done signals to off
+		idle_done 		<= OFF;
+		frame_counter 	<= frame_counter + 1'b1;	
+	end
+
+	/*
 		if(reset)
 		begin
 			x_position <= 8'b0;
