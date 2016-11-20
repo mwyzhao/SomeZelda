@@ -108,8 +108,7 @@ module zelda
 		.left			(left),
 		.right			(right),
 		.draw_map		(draw),
-		.draw_link 		(draw_link),
-		);
+		.draw_link 		(draw_link));
 
 	datapath D(
 		//inputs
@@ -136,7 +135,6 @@ module zelda
 		//.attack_done 	(attack_done),
 		//.move_done 	(move_done),
 		.draw_map_done 	(draw_map_done),
-		.draw_link_done	(draw_link_done)
-		);
+		.draw_link_done	(draw_link_done));
 
 endmodule

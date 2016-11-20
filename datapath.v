@@ -34,17 +34,19 @@ module datapath
 					OFF 	= 1'b0;
 
 	/** wire and register declarations go here **/
-	//vga enable
-	wire enable;
+	//map signal wires
+	wire map_x_pos;
+	wire map_y_pos;
+	wire map_colour;
+	wire map_draw_done;
+	wire map_write;
 
 	//character signal wires
 	wire link_x_pos;
 	wire link_y_pos;
-	wire link_d_done;
-	wire link_draw;
-
-	assign x_position = {0,link_x_pos};
-	assign y_position = {0,link_y_pos};
+	wire link_colour;
+	wire link_draw_done;
+	wire link_write;
 
 	/** module declarations go here **/
 	map M(
@@ -58,8 +60,8 @@ module datapath
 		//.map_s 		(map_s),
 
 		//output x,y coord
-		.x_pos 			(map_y_pos),
-		.y_pos 			(map_x_pos),
+		.x_pos 			(map_x_pos),
+		.y_pos 			(map_y_pos),
 
 		//data to load into VGA
 		colour 			(map_colour),
@@ -93,7 +95,7 @@ module datapath
 		.link_x_draw 	(link_x_pos),
 		.link_y_draw 	(link_y_pos),
 
-		//datat to load into VGA
+		//data to load into VGA
 		.cout 			(link_colour),
 
 		//link output finished signal

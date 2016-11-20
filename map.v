@@ -49,15 +49,13 @@ module map(
 	map_mem map1(
 		.address		(count),
 		.clock 			(clock),
-		.q				(colour)
-		);
+		.q				(colour));
 
 	/* maybe one day
 	map_mem map2(
 		.address 		(count),
 		.clock 			(clock),
-		.q 				(colour)
-		);
+		.q 				(colour));
 	*/
 
 	/** register declaractions **/
