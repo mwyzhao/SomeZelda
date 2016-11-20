@@ -67,7 +67,7 @@ module datapath
 		.colour 			(map_colour),
 
 		//map output finished signals
-		.draw_done 		(map_draw_done),
+		.draw_done 		(draw_map_done),
 
 		//VGA write enable
 		.VGA_write 		(map_write));
@@ -99,7 +99,7 @@ module datapath
 		.cout 			(link_colour),
 
 		//link output finished signal
-		.draw_done 		(link_draw_done), 	//change this later
+		.draw_done 		(draw_link_done), 	//change this later
 
 		//VGA write enable
 		.VGA_write 		(link_write)); 	//change this as well

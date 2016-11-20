@@ -40,12 +40,12 @@ module map(
 	);
 
 	/** parameters **/
-	localparam 		MAX_COUNT 	= 17'b10010110000000000, 		//number of pixels in 320*240
-					MAX_X 		= 9'b100111111,					//319
+	localparam 		MAX_COUNT 	= 17'd76799, 		//number of pixels in 320*240
+					MAX_X 		= 9'd319,					//320
 					ON 			= 1'b1,
 					OFF 		= 1'b0;
 
-	wire address;
+	wire [16:0] address;
 
 	/** memory modules **/
 	map_mem map1(
@@ -61,9 +61,9 @@ module map(
 	*/
 
 	vga_address_translator map_address_translator(
-		x 				(x_pos),
-		y 				(y_pos),
-		mem_address 	(address));
+		.x 				(x_pos),
+		.y 				(y_pos),
+		.mem_address 	(address));
 
 	/** register declaractions **/
 	//counters to signify drawing is done
