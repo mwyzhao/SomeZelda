@@ -1,4 +1,4 @@
-module zelda
+module zelda_game
 	(
 		CLOCK_50,						//	On Board 50 MHz
 		// Your inputs and outputs here
@@ -67,10 +67,10 @@ module zelda
 			.VGA_BLANK 	(VGA_BLANK_N),
 			.VGA_SYNC 	(VGA_SYNC_N),
 			.VGA_CLK 	(VGA_CLK));
-		defparam VGA.RESOLUTION 				= "160x120";
+		defparam VGA.RESOLUTION 				= "320x240";
 		defparam VGA.MONOCHROME 				= "FALSE";
-		defparam VGA.BITS_PER_COLOUR_CHANNEL 	= 1;
-		defparam VGA.BACKGROUND_IMAGE 			= "image.colour.mif";
+		defparam VGA.BITS_PER_COLOUR_CHANNEL 	= 2;
+		defparam VGA.BACKGROUND_IMAGE 			= "resource/bmp1.mif";
 			
 	// Put your code here. Your code should produce signals x,y,colour and writeEn
 	// for the VGA controller, in addition to any other functionality your design may require.
@@ -107,7 +107,7 @@ module zelda
 		.down			(down),
 		.left			(left),
 		.right			(right),
-		.draw_map		(draw),
+		.draw_map		(draw_map),
 		.draw_link 		(draw_link));
 
 	datapath D(

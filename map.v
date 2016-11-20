@@ -20,7 +20,7 @@ module map(
 	input 		  [1:0] map_s,
 	*/
 
-	/* may not need if we have default clear it */
+	/* may not need if we have default clear it
 	//signal to reset draw_done from control
 	input 				draw_ack;
 	*/
@@ -40,14 +40,16 @@ module map(
 	);
 
 	/** parameters **/
-	localparam 		MAX_COUNT 	= 16'b1011_0000_0000_0000, 		//number of pixels in 256x176
-					MAX_X 		= 8'b1010_1111,					//176 - 1
+	localparam 		MAX_COUNT 	= 17'b10010110000000000, 		//number of pixels in 320*240
+					MAX_X 		= 9'b100111111,					//319
 					ON 			= 1'b1,
 					OFF 		= 1'b0;
 
+	wire address;
+
 	/** memory modules **/
 	map_mem map1(
-		.address		(count),
+		.address		(address),
 		.clock 			(clock),
 		.q				(colour));
 
@@ -58,9 +60,14 @@ module map(
 		.q 				(colour));
 	*/
 
+	vga_address_translator map_address_translator(
+		x 				(x_pos),
+		y 				(y_pos),
+		mem_address 	(address));
+
 	/** register declaractions **/
 	//counters to signify drawing is done
-	reg 	[15:0] count;
+	reg 	[16:0] count;
 
 	/** combinational logic **/
 	assign VGA_write = enable;
@@ -72,7 +79,7 @@ module map(
 		begin
 			x_pos <= 9'b0;
 			y_pos <= 8'b0;
-			count <= 16'b0;
+			count <= 17'b0;
 			draw_done <= OFF;
 		end
 
@@ -92,7 +99,7 @@ module map(
 				/* extra layer of safety */
 				x_pos <= 9'b0;
 				y_pos <= 8'b0;
-				count <= 16'b0;
+				count <= 17'b0;
 				draw_done <= ON;
 			end
 			//draw logic here

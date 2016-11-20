@@ -17,8 +17,8 @@ module datapath
 		
 		output 	reg		  [8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
 		output  reg		  [7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
-		output 	reg				colour 				//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
-		output 	reg				VGA_enable			//WRITE ENABLE SIGNAL 			FOR VGA
+		output 	reg			[5:0] colour, 				//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
+		output 	reg				VGA_enable,			//WRITE ENABLE SIGNAL 			FOR VGA
 
 		//probably don't need the commented out signals
 		//output	  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
@@ -30,21 +30,21 @@ module datapath
 	);
 	
 	/** parameters **/
-	localparam 		ON 		= 1'b1;
-					OFF 	= 1'b0;
+	localparam 		ON 		= 1'b1,
+						OFF 	= 1'b0;
 
 	/** wire and register declarations go here **/
 	//map signal wires
-	wire map_x_pos;
-	wire map_y_pos;
-	wire map_colour;
+	wire [8:0] map_x_pos;
+	wire [7:0] map_y_pos;
+	wire [5:0] map_colour;
 	wire map_draw_done;
 	wire map_write;
 
 	//character signal wires
-	wire link_x_pos;
-	wire link_y_pos;
-	wire link_colour;
+	wire [8:0] link_x_pos;
+	wire [7:0] link_y_pos;
+	wire [5:0] link_colour;
 	wire link_draw_done;
 	wire link_write;
 
@@ -64,7 +64,7 @@ module datapath
 		.y_pos 			(map_y_pos),
 
 		//data to load into VGA
-		colour 			(map_colour),
+		.colour 			(map_colour),
 
 		//map output finished signals
 		.draw_done 		(map_draw_done),
@@ -84,7 +84,7 @@ module datapath
 		.move_down 		(down),
 		.move_left 		(left),
 		.move_right 	(right),
-		.draw_char 		(draw),
+		.draw_char 		(draw_link),
 
 		//collision signal
 		/* how would this work?
@@ -148,7 +148,14 @@ module datapath
 	/** combinational logic **/
 	always@(*)
 	begin
-		if((draw_map) && (!draw_map_done))
+		if(reset)
+		begin
+			x_position 	= 9'b0;
+			y_position 	= 8'b0;
+			colour 		= 6'b0;
+			VGA_enable 	= OFF;
+		end
+		else if((draw_map) && (!draw_map_done))
 		begin
 			x_position 	= map_x_pos;
 			y_position 	= map_y_pos;
@@ -156,12 +163,19 @@ module datapath
 			VGA_enable 	= map_write;
 		end
 
-		else if((draw_char)&&(!draw_link_done))
+		else if((draw_link)&&(!draw_link_done))
 		begin
 			x_position 	= link_x_pos;
 			y_position 	= link_y_pos;
 			colour 		= link_colour;
 			VGA_enable 	= link_write;
+		end
+		else //default
+		begin
+			x_position 	= 9'b0;
+			y_position 	= 8'b0;
+			colour 		= 6'b0;
+			VGA_enable 	= OFF;
 		end
 	end
 

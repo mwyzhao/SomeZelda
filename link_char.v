@@ -16,7 +16,7 @@ module link_char(
 	//8 and 7 bits as it will never exceed map bounds (256x176)
 	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
-	output reg 	  [5:0] cout;
+	output 	 	  [5:0] cout,
 	//output finished signals
 	output reg 			draw_done,
 	//output write enable to VGA (do we need this?)
@@ -31,13 +31,13 @@ module link_char(
 					ON 		= 1'b1,
 					OFF 	= 1'b0,
 
-					MAX_COUNT = 6'b111111;
+					MAX_COUNT = 8'b11111111;
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
 
 	link_sprite_mem m0(
-		.address({y,x}),
+		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
 		.q(cout));
 
@@ -56,7 +56,7 @@ module link_char(
 	reg 	[1:0] direction;
 
 	//counter for when link is finished drawing
-	reg 	[5:0] count;
+	reg 	[7:0] count;
 	reg [1:0] facing;
 	assign VGA_write = (draw_char)&&(cout!=6'b111111);
 	always@(posedge clock)
@@ -71,7 +71,6 @@ module link_char(
 			direction 	<= DOWN;
 			count 	 	<= 6'b0;
 			draw_done 	<= OFF;
-			VGA_write  	<= OFF;
 		end
 		else if(init)
 		begin
@@ -131,17 +130,17 @@ module link_char(
 			intAddressY <= 0;
 		end
 		else if(draw_char)
+		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
 			
 			
 				
-			spriteAddressX <= intAddressX + [3:0] count;
-			spriteAddressY <= intAddressY + [7:4] count;
+			spriteAddressX <= intAddressX +  count[3:0];
+			spriteAddressY <= intAddressY +  count[7:4];
 			//increment x and y positions
-			link_x_draw <= x_pos + [3:0] count;
-			link_y_draw <= y_pos + [7:4] count;
-			cout <= spriteColor;
+			link_x_draw <= x_pos +  count[3:0];
+			link_y_draw <= y_pos +count[7:4];
 			//increment counter
 			count 		<= count + 1'b1;
 
@@ -149,8 +148,7 @@ module link_char(
 			if(count == MAX_COUNT)
 			begin
 				//set write enable to off and reset counter
-				VGA_write 	<= OFF;
-				count 		<= 6'b0;
+				count 		<= 8'b0;
 
 				//send out draw done signal to move to next state
 				draw_done 	<= ON;

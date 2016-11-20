@@ -49,7 +49,7 @@ module control(
 	always@(*)
 	begin
 		case(current_state)
-			S_INIT: 			next_state = S_DRAW_UPDATE;				//init_done ? S_DRAW_UPDATE : S_INIT;
+			S_INIT: 			next_state = S_DRAW_MAP;				//init_done ? S_DRAW_UPDATE : S_INIT;
 			S_IDLE:				begin
 									if(attack)
 										next_state = S_ATTACK;
