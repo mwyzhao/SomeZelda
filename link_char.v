@@ -163,7 +163,7 @@ module link_char(
 		end
 		else
 		begin
-			draw_done <=false;
+			draw_done <=OFF;
 		end
 	end
 
