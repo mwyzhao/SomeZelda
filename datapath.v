@@ -12,18 +12,21 @@ module datapath
 		input					down,				//MOVE DOWN SIGNAL				FROM CONTROL
 		input					left,				//MOVE LEFT SIGNAL				FROM CONTROL
 		input					right,				//MOVE RIGHT SIGNAL				FROM CONTROL
-		input					draw,				//DRAW SIGNAL					FROM CONTROL 
+		input					draw_map,			//DRAW MAP SIGNAL				FROM CONTROL 
+		input 					draw_link, 			//DRAW LINK SIGNAL
 		
-		output 			  [8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
-		output  		  [7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
-		output 					VGA_enable			//WRITE ENABLE SIGNAL 			FOR VGA
+		output 	reg		  [8:0] x_position,			//POSITION CORRDINATE X 		FOR VGA
+		output  reg		  [7:0] y_position,			//POSITION COORDINATE Y			FOR VGA
+		output 	reg				colour 				//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
+		output 	reg				VGA_enable			//WRITE ENABLE SIGNAL 			FOR VGA
 
 		//probably don't need the commented out signals
 		//output	  			init_done,			//INITIALIZATION DONE SIGNAL 	FOR CONTROL
 		//output				idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
 		//output	  			attack_done,		//ATTACK DONE SIGNAL 			FOR CONTROL
 		//output 	  			move_done,			//MOVE DONE SIGNAL 				FOR CONTROL
-		output 		  			draw_done,			//DRAW DONE SIGNAL				FOR CONTROL
+		output 		  			draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
+		output 					draw_link_done 		//DRAW DONE SIGNAL
 	);
 	
 	/** parameters **/
@@ -44,25 +47,28 @@ module datapath
 	assign y_position = {0,link_y_pos};
 
 	/** module declarations go here **/
-
-	/*
 	map M(
 		.clock 			(clock),
 		.reset 			(reset),
 
 		//enable signal
-		.draw_map 		(),
+		.enable 		(draw_map),
 
 		//map select
-		//.map_s 		(),
+		//.map_s 		(map_s),
 
-		//map/HUD output finished signals
-		.draw_map_done 	(),
-		.draw_HUD_done 	(),
+		//output x,y coord
+		.x_pos 			(map_y_pos),
+		.y_pos 			(map_x_pos),
+
+		//data to load into VGA
+		colour 			(map_colour),
+
+		//map output finished signals
+		.draw_done 		(map_draw_done),
 
 		//VGA write enable
-		.VGA_write 		());
-	*/
+		.VGA_write 		(map_write));
 
 	link_char p(
 		.clock 			(clock),
@@ -87,11 +93,14 @@ module datapath
 		.link_x_draw 	(link_x_pos),
 		.link_y_draw 	(link_y_pos),
 
+		//datat to load into VGA
+		.cout 			(link_colour),
+
 		//link output finished signal
-		.draw_done 		(draw_done), 	//change this later
+		.draw_done 		(link_draw_done), 	//change this later
 
 		//VGA write enable
-		.VGA_write 		(VGA_enable)); 	//change this as well
+		.VGA_write 		(link_write)); 	//change this as well
 
 	/* not used for now
 	enemy e1();
@@ -133,6 +142,26 @@ module datapath
 	 	c_attack_e1 		(),
 		c_attack_e2 		());
 	*/
+
+	/** combinational logic **/
+	always@(*)
+	begin
+		if((draw_map) && (!draw_map_done))
+		begin
+			x_position 	= map_x_pos;
+			y_position 	= map_y_pos;
+			colour 		= map_colour;
+			VGA_enable 	= map_write;
+		end
+
+		else if((draw_char)&&(!draw_link_done))
+		begin
+			x_position 	= link_x_pos;
+			y_position 	= link_y_pos;
+			colour 		= link_colour;
+			VGA_enable 	= link_write;
+		end
+	end
 
 	//logic for multiplexing different outputs to vga and control
 	/*

@@ -20,7 +20,7 @@ module map(
 	input 		  [1:0] map_s,
 	*/
 
-	/* may not need if we have default clear it
+	/* may not need if we have default clear it */
 	//signal to reset draw_done from control
 	input 				draw_ack;
 	*/
@@ -30,13 +30,13 @@ module map(
 	output reg	  [7:0] y_pos,
 
 	//data to load into VGA memory
-	output 				colour,
+	output 		  [5:0]	colour,
 
 	//output finished signal
 	output reg			draw_done,
 
 	//output write enable to VGA
-	output reg 			VGA_write
+	output  			VGA_write
 	);
 
 	/** parameters **/
@@ -61,12 +61,11 @@ module map(
 	*/
 
 	/** register declaractions **/
-	//registers to signal position of memory to alter redrawing
-	reg		[7:0] x_pos;
-	reg 	[6:0] y_pos;
-
 	//counters to signify drawing is done
 	reg 	[15:0] count;
+
+	/** combinational logic **/
+	assign VGA_write = enable;
 
 	/** sequential logic **/
 	always@(posedge clock)
@@ -76,7 +75,6 @@ module map(
 			x_pos <= 9'b0;
 			y_pos <= 8'b0;
 			count <= 16'b0;
-			VGA_write <= OFF;
 			draw_done <= OFF;
 		end
 
@@ -90,15 +88,13 @@ module map(
 
 		//state to draw map
 		else if(enable)
-		begin
+		begin 
 			if(count == MAX_COUNT)
 			begin
-				/* extra layer of safety
+				/* extra layer of safety */
 				x_pos <= 9'b0;
 				y_pos <= 8'b0;
 				count <= 16'b0;
-				VGA_write <= OFF;
-				*/
 				draw_done <= ON;
 			end
 			//draw logic here
@@ -121,10 +117,11 @@ module map(
 		else
 		begin
 			//reset to prepare for next draw cycle
+			/*
 			x_pos <= 9'b0;
 			y_pos <= 8'b0;
 			count <= 16'b0;
-			VGA_write <= OFF;
+			*/
 			draw_done <= OFF;
 		end
 	end

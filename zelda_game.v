@@ -43,12 +43,10 @@ module zelda
 	
 	// Create the colour, x, y and writeEn wires that are inputs to the controller.
 
-	wire 		[2:0] colour;
-	wire 		[7:0] x;
-	wire 		[6:0] y;
+	wire 		[5:0] colour;
+	wire 		[8:0] x;
+	wire 		[7:0] y;
 	wire 		writeEn;
-
-	assign colour = 3'b101;
 
 	// Create an Instance of a VGA controller - there can be only one!
 	// Define the number of colours as well as the initial background
@@ -82,25 +80,8 @@ module zelda
 	//wire move_done;
 	wire draw_done;
 	
-	wire init;
-	wire idle;
-	wire attack;
-	wire up;
-	wire down;
-	wire left;
-	wire right;
-	wire draw;
-	
-	//paul do you shit here
-	/*
-	map_ram M(
-		.address,
-		.clock,
-		.data,
-		.wren,
-		.q
-		);
-	*/
+	wire init, idle, attack, up, down, left, right, draw_map, draw_link;
+	wire draw_map_done, draw_link_done;
 
 	control C(
 		//inputs
@@ -115,7 +96,8 @@ module zelda
 		//.init_done 	(init_done),
 		//.attack_done	(attack_done),
 		//.move_done	(move_done),
-		.draw_done		(draw_done),
+		.draw_map_done	(draw_map_done),
+		.draw_link_done (draw_link_done),
 		
 		//outputs
 		.init			(init),
@@ -124,8 +106,9 @@ module zelda
 		.up				(up),
 		.down			(down),
 		.left			(left),
-		.right			(right)
-		.draw 			(draw),
+		.right			(right),
+		.draw_map		(draw),
+		.draw_link 		(draw_link),
 		);
 
 	datapath D(
@@ -140,17 +123,20 @@ module zelda
 		.down			(down),
 		.left			(left),
 		.right			(right),
-		.draw 			(draw),
+		.draw_map		(draw_map),
+		.draw_link 		(draw_link),
 		
 		//outputs
 		.x_position		(x),
 		.y_position		(y),
+		.colour 		(colour),
 		.VGA_enable 	(writeEn),
 
 		//.init_done 	(init_done),
 		//.attack_done 	(attack_done),
 		//.move_done 	(move_done),
-		.draw_done 		(draw_done)
+		.draw_map_done 	(draw_map_done),
+		.draw_link_done	(draw_link_done)
 		);
 
 endmodule

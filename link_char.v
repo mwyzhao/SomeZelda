@@ -1,11 +1,8 @@
 /*** implementation of character movement logic based on user inputs ***/
 
-/** FOR NOW LINK WILL BE A SQUARE
-
 module link_char(
 	input clock,
 	input reset,
-
 	//state signals from control
 	input 				init,
 	input 				idle,
@@ -15,19 +12,16 @@ module link_char(
 	input 				move_left,
 	input 				move_right,
 	input 				draw_char,
-
 	//position of memory to be changed as character is updated into memory
 	//8 and 7 bits as it will never exceed map bounds (256x176)
-	output reg 	  [7:0] link_x_draw,
+	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
-	output reg 	  [2:0] cout;
+	output reg 	  [5:0] cout;
 	//output finished signals
 	output reg 			draw_done,
-
 	//output write enable to VGA (do we need this?)
 	output  			VGA_write
 	);
-
 	/** local parameters **/
 	localparam 		UP 		= 2'b00,
 					DOWN 	= 2'b01,
@@ -42,18 +36,19 @@ module link_char(
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
 
-	/*
-	link_sprite_mem m0(...);
-	*/
+	link_sprite_mem m0(
+		.address({y,x}),
+		.clock(clock),
+		.q(cout));
+
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
 	reg [5:0] intAddressX;
 	reg [3:0] intAddressY;
-	wire [5:0] spriteColor;
 	/** position registers for player character link **/
 	
 	//link_pos is the x,y coord of link's character sprite (top left corner of image)
-	reg 	[7:0] x_pos;
+	reg 	[8:0] x_pos;
 	reg		[7:0] y_pos;
 	
 	//direction register as defined by localparam
@@ -63,7 +58,7 @@ module link_char(
 	//counter for when link is finished drawing
 	reg 	[5:0] count;
 	reg [1:0] facing;
-	assign VGA_write = (draw_char)&&(spriteColor!=6'b111111);
+	assign VGA_write = (draw_char)&&(cout!=6'b111111);
 	always@(posedge clock)
 	begin
 		if(reset)
