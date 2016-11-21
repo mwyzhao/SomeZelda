@@ -75,8 +75,8 @@ module enemy(
 			//reset block, resets all registers to 0;
 			enemy_x_draw	<= 9'b0;
 			enemy_y_draw	<= 8'b0;
-			enemy_x_pos		<= 9'b0;
-			enemy_y_pos		<= 8'b0;
+			enemy_x_pos		<= 9'd210;
+			enemy_y_pos		<= 8'd96;
 			count				<= 6'b0;
 			enemy_facing	<= DOWN;
 			draw_done		<= OFF;
@@ -86,8 +86,8 @@ module enemy(
 			//initialize first time character appears on map
 			enemy_x_draw	<= 8'b0;
 			enemy_y_draw	<= 8'b0;
-			enemy_x_pos		<= 8'b0111_1111;
-			enemy_y_pos		<= 8'b0101_1000;
+			enemy_x_pos		<= 9'd210;
+			enemy_y_pos		<= 8'd96;
 			count				<= 6'b0;
 			enemy_facing	<= DOWN;
 			draw_done		<= OFF;

@@ -283,7 +283,10 @@ module collision_detector(
 			end
 
 		
-		if(collision_enable&& (!(&{col_e,col_e_tr, col_e_bl, col_e_br}))||!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
+		if(collision_enable&& ((diff_x <16&& diff_y < 16) || !(&{col_e,col_e_tr, col_e_bl, col_e_br}) || !(&{col_c,col_c_tr, col_c_bl, col_c_br})) ) begin
+				c_e1_collision = OFF;
+				e1_map_collision = OFF;
+				c_map_collision = OFF;
 			if(!(&{col_e,col_e_tr, col_e_bl, col_e_br})) begin
 				e1_map_collision = ON;
 				//facing_e_out = direction_enemy1;
@@ -292,13 +295,12 @@ module collision_detector(
 				c_map_collision = ON;
 				//facing_c_out = direction_char;
 			end
-
+			if(diff_x <16&& diff_y < 16) begin
+				c_e1_collision = ON;
+			end
 		end
 
-		else if(collision_enable && diff_x <16&& diff_y < 16) begin
-			c_e1_collision = ON;
-		end
-		else begin
+		else if (collision_enable)begin
 			c_e1_collision = OFF;
 			e1_map_collision = OFF;
 			c_map_collision = OFF;

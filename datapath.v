@@ -126,7 +126,7 @@ module datapath(
 		.draw_char 		(draw_link),
 
 		//collision signal , 2bit wire
-		.collision		(link_collision),
+		.collision		({OFF,OFF}),
 
 		//link position coordinates
 		.link_x_pos 	(link_x_pos),
@@ -158,7 +158,7 @@ module datapath(
 		.draw_enemies 	(draw_enemies),
 
 		//see description in link module
-		.collision 		(enemy_collision),
+		.collision 		(OFF),
 
 		//enemy position coordinates
 		.enemy_x_pos 	(enemy_x_pos),
