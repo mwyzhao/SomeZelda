@@ -49,28 +49,33 @@ module datapath(
 
 	/** wire and register declarations go here **/
 	//map signal wires
-	wire [8:0] map_x_pos;
-	wire [7:0] map_y_pos;
+	wire [8:0] map_x_draw;
+	wire [7:0] map_y_draw;
 	wire [5:0] map_colour;
 	wire map_draw_done;
 	wire map_write;
-
-	//character action register
-	reg  [2:0] user_input;
 
 	//character signal wires
 	wire [8:0] link_x_pos;
 	wire [7:0] link_y_pos;
 	wire [8:0] link_x_draw;
 	wire [7:0] link_y_draw;
+	wire [2:0] link_direction;
+	wire [1:0] link_facing;
 	wire [5:0] link_colour;
+	wire [1:0] link_collision;
 	wire link_draw_done;
 	wire link_write;
 
 	//enemy signal wires
 	wire [8:0] enemy_x_pos;
 	wire [7:0] enemy_y_pos;
+	wire [8:0] enemy_x_draw;
+	wire [7:0] enemy_y_draw;
+	wire [2:0] enemy_direction;
+	wire [1:0] enemy_facing;
 	wire [5:0] enemy_colour;
+	wire enemy_collision;
 	wire enemy_draw_done;
 	wire enemy_write;
 
@@ -90,8 +95,8 @@ module datapath(
 		//.map_s 		(map_s),
 
 		//output x,y coord
-		.x_pos 			(map_x_pos),
-		.y_pos 			(map_y_pos),
+		.x_pos 			(map_x_draw),
+		.y_pos 			(map_y_draw),
 
 		//data to load into VGA
 		.colour 		(map_colour),
@@ -106,9 +111,17 @@ module datapath(
 		.clock 			(clock),
 		.reset 			(reset),
 
+		//user commands
+		.c_attack 		(c_attack),
+		.c_up 			(c_up),
+		.c_down			(c_down),
+		.c_left 		(d_left),
+		.c_right 		(c_right),
+
 		//enable signal
 		.init 			(init),
 		.idle 			(idle),
+		.reg_action 	(gen_move),
 		.apply_action	(apply_act_link),
 		.draw_char 		(draw_link),
 
@@ -124,6 +137,7 @@ module datapath(
 		.link_y_draw 	(link_y_draw),
 
 		//link facing information
+		.link_direction (link_direction),
 		.link_facing 	(link_facing),
 
 		//data to load into VGA
@@ -170,12 +184,12 @@ module datapath(
 		.reset 				(reset),
 
 		//enable signal for calculations
-		.c_c_enable		 	(check_collide),
+		.collision_enable 	(check_collide),
 
 		//input position coord for collision calculation
 		.x_char 			(link_x_pos),
 		.y_char 			(link_y_pos),
-		.direction_char		(user_input),
+		.direction_char		(link_direction),
 		.facing_char		(link_facing),
 
 		.x_enemy1 			(enemy_x_pos),
@@ -269,22 +283,6 @@ module datapath(
 			end
 		end
 
-		if(gen_move)
-		begin
-			if(c_attack)
-				user_input <= ATTACK;
-			else if(c_up)
-				user_input <= UP;
-			else if(c_down)
-				user_input <= DOWN;
-			else if(c_left)
-				user_input <= LEFT;
-			else if(c_right)
-				user_input <= RIGHT;
-			else
-				user_input <= NO_ACTION;
-		end
-		
 		//always increment counter and set done signals to off
 		idle_done 		<= OFF;
 		frame_counter 	<= frame_counter + 1'b1;	
