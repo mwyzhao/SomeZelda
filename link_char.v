@@ -53,7 +53,7 @@ module link_char(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
 		.q(cout));
-
+	defparam m0.altsyncram_component.init_file = "resources/sprite.mif",
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
 	reg [5:0] intAddressX;
