@@ -1,17 +1,37 @@
 #no .bak files
+
 *.bak
 
+
+
 #no pin dump
+
 c5_pin_model_dump.txt
 
+
+
+#backup memory files
+resources/*.qip
+resources/*bb.v
+
 #no quartus project files
+
 *.qpf
+
 *.qsf
+
 *.qws
 
+
+
 #no quartus project folders
+
 db/
+
 greybox_tmp/
+
 incremental_db/
+
 output_files/
+
 simulation/
