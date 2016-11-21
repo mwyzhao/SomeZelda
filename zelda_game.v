@@ -1,3 +1,5 @@
+/*** top level module for remake of the Legend of Zelda (1986) by Michael Zhao and Paul Wang (2016) ***/
+
 module zelda_game
 	(
 		CLOCK_50,						//	On Board 50 MHz
@@ -74,11 +76,6 @@ module zelda_game
 			
 	// Put your code here. Your code should produce signals x,y,colour and writeEn
 	// for the VGA controller, in addition to any other functionality your design may require.
-	
-	//wire init_done;
-	//wire attack_done;
-	//wire move_done;
-	wire draw_done;
 	
 	wire init, idle, attack, up, down, left, right, draw_map, draw_link;
 	wire draw_map_done, draw_link_done;

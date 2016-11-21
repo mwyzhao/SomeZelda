@@ -1,4 +1,4 @@
-/* NOTE: THIS MODULE NEEDS A MAJOR OVERHAUL */
+/*** control module to control fsm state logic ***/
 
 module control(
 	input			clock, 				//CLOCK 						CLOCK_50
