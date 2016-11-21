@@ -16,6 +16,7 @@ resources/*bb.v
 
 #no quartus project files
 
+*.cdf
 *.qpf
 
 *.qsf
@@ -35,3 +36,6 @@ incremental_db/
 output_files/
 
 simulation/
+
+#register sof programming file
+!output_files/zelda_game.sof

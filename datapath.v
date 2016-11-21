@@ -35,7 +35,7 @@ module datapath(
 	);
 	
 	/** parameters **/
-	localparam 	MAX_FRAME_COUNT = 21'd1000000, 	//count for for 50 fps 50MHz/50
+	localparam 	MAX_FRAME_COUNT = 24'd833333, 	//count for for 50 fps 50MHz/50
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -81,7 +81,7 @@ module datapath(
 
 	//frame counter limits actions to 50Hz
 	//21 bits for overflow safety
-	reg  [20:0] frame_counter;
+	reg  [23:0] frame_counter;
 
 	/** module declarations go here **/
 	map M(
@@ -126,7 +126,7 @@ module datapath(
 		.draw_char 		(draw_link),
 
 		//collision signal , 2bit wire
-		.collision		({OFF,OFF}),
+		.collision		(link_collision),
 
 		//link position coordinates
 		.link_x_pos 	(link_x_pos),
@@ -158,7 +158,7 @@ module datapath(
 		.draw_enemies 	(draw_enemies),
 
 		//see description in link module
-		.collision 		(OFF),
+		.collision 		(enemy_collision),
 
 		//enemy position coordinates
 		.enemy_x_pos 	(enemy_x_pos),
@@ -257,14 +257,14 @@ module datapath(
 		if(reset)
 		begin
 			idle_done 		<= OFF;
-			frame_counter 	<= 21'b0;
+			frame_counter 	<= 24'b0;
 		end
 
 		//initialize registers
 		else if(init)
 		begin
 			idle_done 		<= OFF;
-			frame_counter 	<= 21'b0;
+			frame_counter 	<= 24'b0;
 		end
 
 		//once idle state is reached, 
@@ -274,13 +274,17 @@ module datapath(
 			if(frame_counter > MAX_FRAME_COUNT)
 			begin
 				idle_done 		<= ON;
-				frame_counter 	<= 21'b0;
+				frame_counter 	<= 24'b0;
 			end
 		end
 
 		//always increment counter and set done signals to off
-		idle_done 		<= OFF;
-		frame_counter 	<= frame_counter + 1'b1;	
+		else
+		begin
+			idle_done 		<= OFF;
+		end
+		
+		frame_counter 	<= frame_counter + 1'b1;
 	end
 
 endmodule

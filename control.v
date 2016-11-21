@@ -11,6 +11,8 @@ module control(
 	input 			draw_link_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 
+	output 	[3:0] states,
+	
 	output reg 		init,				//INITIALIZATION SIGNAL			FOR DATAPATH
 	output reg		idle,				//IDLE SIGNAL					FOR DATAPATH
 	output reg 		gen_move, 			//MOVEMENT SIGNAL 				FOR DATAPATH
@@ -36,22 +38,23 @@ module control(
 					OFF 				= 1'b0;
 
 	//State register declarations
-	reg [4:0] current_state, next_state;
+	reg [3:0] current_state, next_state;
+	assign states = current_state;
 
 	//Next state logic
 	always@(*)
 	begin
 		case(current_state)
-			S_INIT: 			next_state = S_DRAW_MAP;
+			S_INIT: 				next_state = S_DRAW_MAP;
 			S_IDLE:				next_state = idle_done ? S_GEN_MOVEMENT : S_IDLE;
-			S_GEN_MOVEMENT: 		next_state = S_CHECK_COLLIDE;
+			S_GEN_MOVEMENT: 	next_state = S_CHECK_COLLIDE;
 			S_CHECK_COLLIDE: 	next_state = S_LINK_ACTION;
 			S_LINK_ACTION:		next_state = S_MOVE_ENEMIES;
-			S_MOVE_ENEMIES: 		next_state = S_DRAW_MAP;
+			S_MOVE_ENEMIES: 	next_state = S_DRAW_MAP;
 			S_DRAW_MAP:			next_state = draw_map_done ? S_DRAW_LINK : S_DRAW_MAP;
 			S_DRAW_LINK: 		next_state = draw_link_done ? S_DRAW_ENEMIES : S_DRAW_LINK;
-			S_DRAW_ENEMIES:		next_state = draw_enemies_done ? S_IDLE : S_DRAW_ENEMIES;
-			default:			next_state = S_IDLE;
+			S_DRAW_ENEMIES:	next_state = draw_enemies_done ? S_IDLE : S_DRAW_ENEMIES;
+			default:				next_state = S_IDLE;
 		endcase
 	end
 

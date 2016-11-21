@@ -82,7 +82,7 @@ module link_char(
 			//reset block, resets all registers to 0;
 			link_x_draw <= 9'b0;
 			link_y_draw <= 8'b0;
-			link_x_pos 	<= 9'b0;
+			link_x_pos 	<= 9'd1;
 			link_y_pos 	<= 8'd96;
 			count 	 	<= 6'b0;
 			link_facing <= DOWN;
@@ -94,7 +94,7 @@ module link_char(
 			//initialize first time character appears on map
 			link_x_draw <= 8'b0;
 			link_y_draw <= 8'b0;
-			link_x_pos	<= 9'b0;
+			link_x_pos	<= 9'd1;
 			link_y_pos	<= 8'd96;
 			count  		<= 6'b0;
 			link_facing <= DOWN;

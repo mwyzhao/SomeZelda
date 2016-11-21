@@ -6,6 +6,7 @@ module zelda_game
 		// Your inputs and outputs here
 		SW,
 		KEY,
+		LEDR,
 		// The ports below are for the VGA output.  Do not change.
 		VGA_CLK,   						//	VGA Clock
 		VGA_HS,							//	VGA H_SYNC
@@ -21,6 +22,7 @@ module zelda_game
 	// Declare your inputs and outputs here
 	input 	[9:0] SW;
 	input 	[3:0] KEY;
+	output 	[3:0] LEDR;
 	// Do not change the following outputs
 	output			VGA_CLK;   		//	VGA Clock
 	output			VGA_HS;			//	VGA H_SYNC
@@ -95,9 +97,11 @@ module zelda_game
 		//.check_collide_done	(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done 	(draw_link_done),
-		.draw_enemies_done	(draw_enemies_done),
+		.draw_enemies_done(draw_enemies_done),
 		
 		//outputs
+		.states 				(LEDR),
+		
 		.init					(init),
 		.idle 				(idle),
 		.gen_move			(gen_move),
