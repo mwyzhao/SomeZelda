@@ -1,12 +1,4 @@
-/*** contains memory for map and the HUD ***/
-
-/* control module directs map_HUD module to clear map
- * and change HUD values when draw_map or draw_hud bit is high */
-
-/* should we hardcode the HUD values? */
-/* also consider separating map and HUD into separate modules */
-
-/* tentative module declaration */
+/*** map memory and map draw logic ***/
 
 module map(
 	input clock,

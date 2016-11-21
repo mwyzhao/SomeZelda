@@ -6,16 +6,18 @@ module link_char(
 	//state signals from control
 	input 				init,
 	input 				idle,
-	input 				attack,
-	input 				move_up,
-	input 				move_down,
-	input 				move_left,
-	input 				move_right,
+	input 				reg_action,
+	input 				apply_action,
 	input 				draw_char,
+	input 		  [2:0] user_input,
+	input 		  [1:0] collision,
 	//position of memory to be changed as character is updated into memory
 	//8 and 7 bits as it will never exceed map bounds (256x176)
+	output reg 	  [8:0] link_x_pos,
+	output reg 	  [7:0] link_y_pos,
 	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
+	output reg 	  [1:0] link_facing,
 	output 	 	  [5:0] cout,
 	//output finished signals
 	output reg 			draw_done,
@@ -23,10 +25,17 @@ module link_char(
 	output  			VGA_write
 	);
 	/** local parameters **/
-	localparam 		UP 		= 2'b00,
-					DOWN 	= 2'b01,
-					LEFT 	= 2'b10,
-					RIGHT 	= 2'b11,
+	localparam 		NO_ACTION 	= 3'b000;
+					ATTACK 		= 3'b001;
+					UP 			= 3'b010;
+					DOWN 		= 3'b011;
+					LEFT 		= 3'b100;
+					RIGHT 		= 3'b101;
+
+					F_UP 	= 2'b00,
+					F_DOWN 	= 2'b01,
+					F_LEFT 	= 2'b10,
+					F_RIGHT = 2'b11,
 
 					ON 		= 1'b1,
 					OFF 	= 1'b0,
@@ -53,12 +62,19 @@ module link_char(
 	
 	//direction register as defined by localparam
 	//this is to be used by attack state
-	reg 	[1:0] direction;
+	reg 	[1:0] facing;
 
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
-	reg [1:0] facing;
+
 	assign VGA_write = (draw_char)&&(cout!=6'b111111);
+
+	//combinational logic
+	always@(*)
+	begin
+		if()
+
+	//sequential logic
 	always@(posedge clock)
 	begin
 		if(reset)
@@ -83,59 +99,54 @@ module link_char(
 			count  		<= 6'b0;
 			facing 		<= DOWN;
 		end
-		/*
-		else if(idle)
+		
+		else if(apply_action)
 		begin
-			//we probably don't even need this
+			/*
+			else if(user_input == ATTACK)
+			begin
+				//pull from attack sprites
+			end
+			*/
+			else if(user_input == UP)
+			begin
+				//pull from move up sprites
+				y_pos 		<= y_pos - 1'b1;
+				facing 		<= F_UP;
+				intAddressX <= 32;
+				intAddressY <= 0;
+			end
+			else if(user_input == DOWN)
+			begin
+				//pull from move down sprites
+				y_pos 		<= y_pos + 1'b1;
+				facing 		<= F_DOWN;
+				intAddressX <= 0;
+				intAddressY <= 0;
+			end
+			else if(user_input == LEFT)
+			begin
+				//pull from move left sprites
+				x_pos 		<= x_pos - 1'b1;
+				facing 		<= F_LEFT;
+				intAddressX  <= 16;
+				intAddressY <= 0;
+			end
+			else if(user_input == RIGHT)
+			begin
+				//pull from move right sprites
+				x_pos 		<= x_pos + 1'b1;
+				facing 		<= F_RIGHT;
+				intAddressX  <= 48;
+				intAddressY <= 0;
+			end
 		end
-		else if(attack)
-		begin
-			//pull from attack sprites
-		end
-		*/
-		else if(move_up)
-		begin
-			//pull from move up sprites
-			direction 	<= UP;
-			y_pos 		<= y_pos - 1'b1;
-			facing 		<= UP;
-			intAddressX <= 32;
-			intAddressY <= 0;
-		end
-		else if(move_down)
-		begin
-			//pull from move down sprites
-			direction 	<= DOWN;
-			y_pos 		<= y_pos + 1'b1;
-			facing 		<= DOWN;
-			intAddressX  <= 0;
-			intAddressY <= 0;
-		end
-		else if(move_left)
-		begin
-			//pull from move left sprites
-			direction 	<= LEFT;
-			x_pos 		<= x_pos - 1'b1;
-			facing 		<= LEFT;
-			intAddressX  <= 16;
-			intAddressY <= 0;
-		end
-		else if(move_right)
-		begin
-			//pull from move right sprites
-			direction 	<= RIGHT;
-			x_pos 		<= x_pos + 1'b1;
-			facing 		<= RIGHT;
-			intAddressX  <= 48;
-			intAddressY <= 0;
-		end
+
 		else if(draw_char)
 		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
 			
-			
-				
 			spriteAddressX <= intAddressX +  count[3:0];
 			spriteAddressY <= intAddressY +  count[7:4];
 			//increment x and y positions
