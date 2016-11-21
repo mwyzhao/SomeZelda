@@ -17,8 +17,8 @@ module collision_detector(
 	input reset,
 
 	//enable signal from control
-	input c_c_enable,
 	input collision_enable;
+	
 	//position for player character
 	input		[8:0] char_x,
 	input		[7:0] char_y,
@@ -26,12 +26,12 @@ module collision_detector(
 	input 		[2:0] facing_char;
 
 	//position for enemies
-	input		[8:0]enemy1_x,
-	input		[7:0]enemy1_y,
+	input		[8:0] enemy1_x,
+	input		[7:0] enemy1_y,
 	input 		[2:0] direction_enemy1;
 	input 		[2:0] facing_enemy1;
 
-	//input 		x_enemy2,
+	//input 	x_enemy2,
 	//input		y_enemy2,
 
 	/* output signals indicating if any collisions have occurred
@@ -52,6 +52,7 @@ module collision_detector(
 	output reg [1:0] facing_c_out;
 	output reg [1:0] facing_e_out;
 	);
+
 	localparam 		NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
 					UP 				= 3'b010,

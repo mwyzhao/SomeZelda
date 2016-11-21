@@ -3,31 +3,44 @@
 module link_char(
 	input clock,
 	input reset,
+
+	//user commands from KEY,SW
+	input 				c_attack,
+	input 				c_up,
+	input 				c_down,
+	input 				c_left,
+	input 				c_right,
+
 	//state signals from control
 	input 				init,
 	input 				idle,
+	input 				reg_action,
 	input 				apply_action,
 	input 				draw_char,
 
-	input 		  [2:0] user_input,
-
+	//collision signal from collision_detector
 	input 		  [1:0] collision,
 
+	//link position for collision_detector and vga
 	output reg 	  [8:0] link_x_pos,
 	output reg 	  [7:0] link_y_pos,
 	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
 
+	//link direction data for collision_detector
+	output reg 	  [2:0] link_direciton,
 	output reg 	  [1:0] link_facing,
 
+	//memory output data for vga
 	output 	 	  [5:0] cout,
 
 	//output finished signals
 	output reg 			draw_done,
 
-	//output write enable to VGA (do we need this?)
+	//output write enable to VGA
 	output  			VGA_write
 	);
+
 	/** local parameters **/
 	localparam 		NO_ACTION 	= 3'b000;
 					ATTACK 		= 3'b001;
@@ -53,7 +66,8 @@ module link_char(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
 		.q(cout));
-	defparam m0.altsyncram_component.init_file = "resources/sprite.mif",
+
+	/** registers and wires **/
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
 	reg [5:0] intAddressX;
@@ -71,9 +85,9 @@ module link_char(
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
-			link_x_draw <= 8'b0;
+			link_x_draw <= 9'b0;
 			link_y_draw <= 8'b0;
-			link_x_pos 	<= 8'b0;
+			link_x_pos 	<= 9'b0;
 			link_y_pos 	<= 8'b0;
 			count 	 	<= 6'b0;
 			link_facing <= F_DOWN;
@@ -91,44 +105,72 @@ module link_char(
 			draw_done 	<= OFF;
 		end
 		
+		else if(reg_action)
+		begin
+			if(c_attack)
+				link_direction <= ATTACK;
+			else if(c_up)
+				link_direction <= UP;
+			else if(c_down)
+				link_direction <= DOWN;
+			else if(c_left)
+				link_direction <= LEFT;
+			else if(c_right)
+				link_direction <= RIGHT;
+			else
+				link_direction <= NO_ACTION;
+		end
+
 		else if(apply_action)
 		begin
 			/*
-			else if(user_input == ATTACK)
+			else if(link_direction == ATTACK)
 			begin
 				//pull from attack sprites
 			end
 			*/
-			else if(user_input == UP)
+			else if(link_direction == UP)
 			begin
 				//pull from move up sprites
-				y_pos 		<= y_pos - 1'b1;
-				facing 		<= F_UP;
+				if(!collision[0])
+				begin
+					link_y_pos 	<= link_y_pos - 1'b1;
+				end
+				link_facing <= F_UP;
 				intAddressX <= 32;
 				intAddressY <= 0;
 			end
-			else if(user_input == DOWN)
+			else if(link_direction == DOWN)
 			begin
 				//pull from move down sprites
-				y_pos 		<= y_pos + 1'b1;
-				facing 		<= F_DOWN;
+				if(!collision[0])
+				begin
+					link_y_pos 	<= link_y_pos + 1'b1;
+				end
+				link_facing	<= F_DOWN;
 				intAddressX <= 0;
 				intAddressY <= 0;
 			end
-			else if(user_input == LEFT)
+			else if(link_direction == LEFT)
 			begin
 				//pull from move left sprites
-				x_pos 		<= x_pos - 1'b1;
-				facing 		<= F_LEFT;
-				intAddressX  <= 16;
+				if(!collision[0])
+				begin
+					link_x_pos	<= link_x_pos - 1'b1;
+				end
+				link_facing <= F_LEFT;
+				intAddressX <= 16;
 				intAddressY <= 0;
 			end
-			else if(user_input == RIGHT)
+			else if(link_direction == RIGHT)
 			begin
 				//pull from move right sprites
-				x_pos 		<= x_pos + 1'b1;
-				facing 		<= F_RIGHT;
-				intAddressX  <= 48;
+				if(!collision[0])
+				begin
+					link_x_pos	<= link_x_pos + 1'b1;
+				end
+				link_facing <= F_RIGHT;
+				intAddressX <= 48;
 				intAddressY <= 0;
 			end
 		end
@@ -137,12 +179,11 @@ module link_char(
 		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
-			
-			spriteAddressX <= intAddressX +  count[3:0];
-			spriteAddressY <= intAddressY +  count[7:4];
+			spriteAddressX <= intAddressX + count[3:0];
+			spriteAddressY <= intAddressY + count[7:4];
 			//increment x and y positions
-			link_x_draw <= x_pos +  count[3:0];
-			link_y_draw <= y_pos +count[7:4];
+			link_x_draw <= link_x_pos + count[3:0];
+			link_y_draw <= link_y_pos + count[7:4];
 			//increment counter
 			count 		<= count + 1'b1;
 
