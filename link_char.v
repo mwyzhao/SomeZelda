@@ -17,7 +17,6 @@ module link_char(
 	output reg 	  [7:0] link_y_pos,
 	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
-	output reg 	  [1:0] link_direction,
 	output reg 	  [1:0] link_facing,
 	output 	 	  [5:0] cout,
 	//output finished signals
@@ -33,10 +32,10 @@ module link_char(
 					LEFT 		= 3'b100;
 					RIGHT 		= 3'b101;
 
-					MOVE_UP 	= 2'b00,
-					MOVE_DOWN 	= 2'b01,
-					MOVE_LEFT 	= 2'b10,
-					MOVE_RIGHT 	= 2'b11,
+					F_UP 	= 2'b00,
+					F_DOWN 	= 2'b01,
+					F_LEFT 	= 2'b10,
+					F_RIGHT = 2'b11,
 
 					ON 		= 1'b1,
 					OFF 	= 1'b0,
@@ -63,12 +62,19 @@ module link_char(
 	
 	//direction register as defined by localparam
 	//this is to be used by attack state
-	reg 	[1:0] direction;
+	reg 	[1:0] facing;
 
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
-	reg [1:0] facing;
+
 	assign VGA_write = (draw_char)&&(cout!=6'b111111);
+
+	//combinational logic
+	always@(*)
+	begin
+		if()
+
+	//sequential logic
 	always@(posedge clock)
 	begin
 		if(reset)
@@ -105,36 +111,32 @@ module link_char(
 			else if(user_input == UP)
 			begin
 				//pull from move up sprites
-				direction 	<= UP;
 				y_pos 		<= y_pos - 1'b1;
-				facing 		<= UP;
+				facing 		<= F_UP;
 				intAddressX <= 32;
 				intAddressY <= 0;
 			end
 			else if(user_input == DOWN)
 			begin
 				//pull from move down sprites
-				direction 	<= DOWN;
 				y_pos 		<= y_pos + 1'b1;
-				facing 		<= DOWN;
-				intAddressX  <= 0;
+				facing 		<= F_DOWN;
+				intAddressX <= 0;
 				intAddressY <= 0;
 			end
 			else if(user_input == LEFT)
 			begin
 				//pull from move left sprites
-				direction 	<= LEFT;
 				x_pos 		<= x_pos - 1'b1;
-				facing 		<= LEFT;
+				facing 		<= F_LEFT;
 				intAddressX  <= 16;
 				intAddressY <= 0;
 			end
 			else if(user_input == RIGHT)
 			begin
 				//pull from move right sprites
-				direction 	<= RIGHT;
 				x_pos 		<= x_pos + 1'b1;
-				facing 		<= RIGHT;
+				facing 		<= F_RIGHT;
 				intAddressX  <= 48;
 				intAddressY <= 0;
 			end
@@ -145,8 +147,6 @@ module link_char(
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
 			
-			
-				
 			spriteAddressX <= intAddressX +  count[3:0];
 			spriteAddressY <= intAddressY +  count[7:4];
 			//increment x and y positions
