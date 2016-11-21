@@ -15,3 +15,6 @@ greybox_tmp/
 incremental_db/
 output_files/
 simulation/
+
+#do track .sof
+!output_files/*.sof
