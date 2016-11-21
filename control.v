@@ -5,8 +5,8 @@ module control(
 	input			reset,				//RESET							SW[9]
 
 	input			idle_done, 			//FRAME DONE SIGNAL				FROM DATAPATH
-	input 			gen_move_done, 		//MOVEMENT DONE SIGNAL 			FROM DATAPATH
-	input 			check_collide_done, //COLLIDE DONE SIGNAL 			FROM DATAPATH
+	//input 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FROM DATAPATH
+	//input 		check_collide_done, //COLLIDE DONE SIGNAL 			FROM DATAPATH
 	input			draw_map_done,		//DRAW DONE SIGNAL				FROM DATAPATH
 	input 			draw_link_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
@@ -28,7 +28,7 @@ module control(
 					S_GEN_MOVEMENT 		= 4'b0010, 		//TAKE USER INPUT AND GENERATE ENEMY MOVEMENT 
 					S_CHECK_COLLIDE 	= 4'b0011, 		//CHECK FOR COLLISION USING GENERATED MOVEMENT
 					S_CHAR_ACTION		= 4'b0100, 		//APPLY USER INPUT ACTION
-					S_LINK_ENEMIES	 	= 4'b0101, 		//APPLY ENEMY MOVEMENT
+					S_MOVE_ENEMIES	 	= 4'b0101, 		//APPLY ENEMY MOVEMENT
 					S_DRAW_MAP			= 4'b0110, 		//DRAW MAP
 					S_DRAW_LINK 		= 4'b0111, 		//DRAW USER CHARACTER
 					S_DRAW_ENEMIES 		= 4'b1000, 		//DRAW ENEMIES
@@ -44,8 +44,8 @@ module control(
 		case(current_state)
 			S_INIT: 			next_state = S_DRAW_MAP;
 			S_IDLE:				next_state = idle_done ? S_GEN_MOVEMENT : S_IDLE;
-			S_GEN_MOVEMENT 		next_state = gen_move_done ? S_CHECK_COLLIDE : S_GEN_MOVEMENT;
-			S_CHECK_COLLIDE: 	next_state = check_collide_done ? S_CHAR_ACTION : S_CHECK_COLLIDE;
+			S_GEN_MOVEMENT 		next_state = S_CHECK_COLLIDE;
+			S_CHECK_COLLIDE: 	next_state = S_CHAR_ACTION;
 			S_LINK_ACTION:		next_state = S_MOVE_ENEMIES;
 			S_MOVE_ENEMIES 		next_state = S_DRAW_MAP;
 			S_DRAW_MAP:			next_state = draw_map_done ? S_DRAW_LINK : S_DRAW_MAP;

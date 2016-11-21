@@ -18,7 +18,7 @@ module collision_detector(
 
 	//enable signal from control
 	input collision_enable;
-	
+
 	//position for player character
 	input		[8:0] char_x,
 	input		[7:0] char_y,
@@ -31,9 +31,6 @@ module collision_detector(
 	input 		[2:0] direction_enemy1;
 	input 		[2:0] facing_enemy1;
 
-	//input 	x_enemy2,
-	//input		y_enemy2,
-
 	/* output signals indicating if any collisions have occurred
 	 * set to 1 if true, 0 if false */
 	/* these signals are sent to the character and enemy logic modules
@@ -41,16 +38,10 @@ module collision_detector(
 	/* c = player character, e1 = enemy1, e2 = enemy2 */
 	output reg	c_map_collision,
 	output reg	e1_map_collision,
-	//output reg	e2_map_collision,
 	output reg	c_e1_collision,
-	//output reg	c_e2_collision,
-	//output reg	e1_e2_collision,
-	//output reg 	c_attack_e1,
-	//output reg	c_attack_e2,
-	//output reg 		done_check;
 
-	output reg [1:0] facing_c_out;
-	output reg [1:0] facing_e_out;
+	//output reg [1:0] facing_c_out;
+	//output reg [1:0] facing_e_out;
 	);
 
 	localparam 		NO_ACTION 		= 3'b000,
@@ -295,11 +286,11 @@ module collision_detector(
 		if(collision_enable&& (!(&{col_e,col_e_tr, col_e_bl, col_e_br})||!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
 			if(!(&{col_e,col_e_tr, col_e_bl, col_e_br})) begin
 				e1_map_collision = ON;
-				facing_e_out = direction_enemy1;
+				//facing_e_out = direction_enemy1;
 			end
 			if (!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
 				c_map_collision = ON;
-				facing_c_out = direction_char;
+				//facing_c_out = direction_char;
 			end
 
 		end

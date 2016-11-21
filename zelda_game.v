@@ -32,12 +32,14 @@ module zelda_game
 	output	[9:0]	VGA_B;   		//	VGA Blue[9:0]
 	
 	wire 			reset;
+	wire 			c_attack;
 	wire 			c_up;
 	wire 			c_down;
 	wire 			c_left;
 	wire 			c_right;
 	
 	assign 			reset 			= SW[9];
+	assign 			c_attack 		= SW[0];
 	assign 			c_up 			= ~KEY[3];
 	assign 			c_down 			= ~KEY[2];
 	assign 			c_left 			= ~KEY[1];
@@ -82,56 +84,59 @@ module zelda_game
 
 	control C(
 		//inputs
-		.clock 			(CLOCK_50),
-		.reset 			(reset),
-
-		.c_up 			(c_up),
-		.c_down 		(c_down),
-		.c_left 		(c_left),
-		.c_right 		(c_right),
+		.clock 				(CLOCK_50),
+		.reset 				(reset),
 		
-		//.init_done 	(init_done),
-		//.attack_done	(attack_done),
-		//.move_done	(move_done),
-		.draw_map_done	(draw_map_done),
-		.draw_link_done (draw_link_done),
+		.idle_done			(idle_done),
+		//.gen_move_done		(gen_move_done),
+		//.check_collide_done	(check_collide_done),
+		.draw_map_done		(draw_map_done),
+		.draw_link_done 	(draw_link_done),
+		.draw_enemies_done	(draw_ememies_done),
 		
 		//outputs
-		.init			(init),
-		.idle 			(idle),
-		.attack			(attack),
-		.up				(up),
-		.down			(down),
-		.left			(left),
-		.right			(right),
-		.draw_map		(draw_map),
-		.draw_link 		(draw_link));
+		.init				(init),
+		.idle 				(idle),
+		.gen_move			(gen_move),
+		.check_collide		(check_collide),
+		.apply_act_link		(apply_act_link),
+		.move_enemies		(move_enemies),
+		.draw_map			(draw_map),
+		.draw_link			(draw_link),
+		.draw_enemies		(draw_enemies));
 
 	datapath D(
 		//inputs
-		.clock 			(CLOCK_50),
-		.reset			(reset),
-		
-		.init			(init),
-		.idle 			(idle),
-		.attack			(attack),
-		.up				(up),
-		.down			(down),
-		.left			(left),
-		.right			(right),
-		.draw_map		(draw_map),
-		.draw_link 		(draw_link),
-		
-		//outputs
-		.x_position		(x),
-		.y_position		(y),
-		.colour 		(colour),
-		.VGA_enable 	(writeEn),
+		.clock				(CLOCK_50),
+		.reset				(reset),
 
-		//.init_done 	(init_done),
-		//.attack_done 	(attack_done),
-		//.move_done 	(move_done),
-		.draw_map_done 	(draw_map_done),
-		.draw_link_done	(draw_link_done));
+		.c_attack			(c_attack),
+		.c_up				(c_up),
+		.c_down				(c_down),
+		.c_left				(c_left),
+		.c_right			(c_right),
+		
+		.init				(init),
+		.idle				(idle),
+		.gen_move			(gen_move),
+		.check_collide		(check_collide),
+		.apply_act_link		(apply_act_link),
+		.move_enemies		(move_enemies),
+		.draw_map			(draw_map),
+		.draw_link			(draw_link),
+		.draw_enemies		(draw_enemies),
+
+		//outputs
+		.x_position			(x),
+		.y_position			(y),
+		.colour 			(colour),
+		.VGA_enable 		(writeEn),
+
+		.idle_done			(idle_done),
+		//.gen_move_done	(attack_done),
+		//.move_done		(move_done),
+		.draw_map_done		(draw_map_done),
+		.draw_link_done		(draw_link_done),
+		.draw_enemies_done	(draw_enemies_done));
 
 endmodule

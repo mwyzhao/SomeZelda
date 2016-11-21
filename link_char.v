@@ -32,7 +32,7 @@ module link_char(
 	output reg 	  [1:0] link_facing,
 
 	//memory output data for vga
-	output 	 	  [5:0] cout,
+	output 	 	  [5:0] colour,
 
 	//output finished signals
 	output reg 			draw_done,
@@ -57,7 +57,7 @@ module link_char(
 					ON 		= 1'b1,
 					OFF 	= 1'b0,
 
-					MAX_COUNT = 8'b11111111;
+					MAX_COUNT = 8'b255;
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
@@ -65,7 +65,7 @@ module link_char(
 	link_sprite_mem m0(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
-		.q(cout));
+		.q(colour));
 
 	/** registers and wires **/
 	reg [5:0] spriteAddressX;
@@ -77,7 +77,7 @@ module link_char(
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
 
-	assign VGA_write = (draw_char)&&(cout!=6'b111111);
+	assign VGA_write = (draw_char) && (colour != 6'b111111);
 
 	//sequential logic
 	always@(posedge clock)

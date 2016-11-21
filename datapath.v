@@ -4,7 +4,7 @@ module datapath(
 	input  			clock,				//CLOCK 						CLOCK_50
 	input 			reset,				//RESET							SW[9]
 
-	input 			c_attack, 			//INPUT ATTACK SIGNAL 			SW[1]
+	input 			c_attack, 			//INPUT ATTACK SIGNAL 			SW[0]
 	input			c_up,				//INPUT UP SIGNAL 				KEY[3]
 	input			c_down,				//INPUT DOWN SIGNAL 			KEY[2]
 	input			c_left,				//INPUT LEFT SIGNAL 			KEY[1]
@@ -27,8 +27,8 @@ module datapath(
 
 	//probably don't need the commented out signals
 	output			idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
-	output 			gen_move_done, 		//MOVEMENT DONE SIGNAL 			FOR CONTROL
-	output 			check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
+	//output 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FOR CONTROL
+	//output 		check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
 	output 		  	draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
 	output 			draw_link_done 		//DRAW DONE SIGNAL 				FOR CONTROL
 	output 			draw_enemies_done 	//DRAW DONE SIGNAL 				FOR CONTROL
@@ -141,7 +141,7 @@ module datapath(
 		.link_facing 	(link_facing),
 
 		//data to load into VGA
-		.cout 			(link_colour),
+		.colour			(link_colour),
 
 		//link output finished signal
 		.draw_done 		(draw_link_done),
@@ -173,7 +173,7 @@ module datapath(
 		.enemy_facing 	(enemy_facing),
 
 		//data to load into VGA
-		.colour 		(enemy_colour),
+		.colour	 		(enemy_colour),
 
 		.draw_done 		(draw_enemies_done),
 
