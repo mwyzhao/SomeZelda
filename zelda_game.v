@@ -79,8 +79,11 @@ module zelda_game
 	// Put your code here. Your code should produce signals x,y,colour and writeEn
 	// for the VGA controller, in addition to any other functionality your design may require.
 	
-	wire init, idle, attack, up, down, left, right, draw_map, draw_link;
-	wire draw_map_done, draw_link_done;
+	wire init, idle, gen_move, check_collide;
+	wire apply_act_link, move_enemies;
+	wire draw_map, draw_link, draw_enemies;
+	
+	wire idle_done,draw_map_done, draw_link_done, draw_enemies_done;
 
 	control C(
 		//inputs
@@ -92,14 +95,14 @@ module zelda_game
 		//.check_collide_done	(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done 	(draw_link_done),
-		.draw_enemies_done	(draw_ememies_done),
+		.draw_enemies_done	(draw_enemies_done),
 		
 		//outputs
-		.init				(init),
+		.init					(init),
 		.idle 				(idle),
 		.gen_move			(gen_move),
 		.check_collide		(check_collide),
-		.apply_act_link		(apply_act_link),
+		.apply_act_link	(apply_act_link),
 		.move_enemies		(move_enemies),
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
@@ -111,16 +114,16 @@ module zelda_game
 		.reset				(reset),
 
 		.c_attack			(c_attack),
-		.c_up				(c_up),
+		.c_up					(c_up),
 		.c_down				(c_down),
 		.c_left				(c_left),
-		.c_right			(c_right),
+		.c_right				(c_right),
 		
-		.init				(init),
-		.idle				(idle),
+		.init					(init),
+		.idle					(idle),
 		.gen_move			(gen_move),
 		.check_collide		(check_collide),
-		.apply_act_link		(apply_act_link),
+		.apply_act_link	(apply_act_link),
 		.move_enemies		(move_enemies),
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
@@ -129,14 +132,14 @@ module zelda_game
 		//outputs
 		.x_position			(x),
 		.y_position			(y),
-		.colour 			(colour),
+		.colour 				(colour),
 		.VGA_enable 		(writeEn),
 
 		.idle_done			(idle_done),
 		//.gen_move_done	(attack_done),
 		//.move_done		(move_done),
 		.draw_map_done		(draw_map_done),
-		.draw_link_done		(draw_link_done),
-		.draw_enemies_done	(draw_enemies_done));
+		.draw_link_done	(draw_link_done),
+		.draw_enemies_done(draw_enemies_done));
 
 endmodule

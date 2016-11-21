@@ -18,41 +18,36 @@ module enemy(
 	input 		  		collision,
 
 	//enemy position for collision_detector and vga
-	output reg 	  [8:0] enemy_x_pos,
-	output reg 	  [7:0] enemy_y_pos,
-	output reg 	  [8:0] enemy_x_draw,
-	output reg 	  [7:0] enemy_y_draw,
+	output reg 	[8:0] enemy_x_pos,
+	output reg 	[7:0] enemy_y_pos,
+	output reg 	[8:0] enemy_x_draw,
+	output reg 	[7:0] enemy_y_draw,
 
 	//enemy direction data for collision_detector
-	output reg 	  [2:0] enemy_direction,
-	output reg 	  [1:0] enemy_facing,
+	output reg 	[2:0] enemy_direction,
+	output reg 	[2:0] enemy_facing,
 
 	//memory output data for vga
-	output 	 	  [5:0] colour,
+	output 	 	[5:0] colour,
 
 	//output finished signals
 	output reg 			draw_done,
 	//output write enable to VGA (do we need this?)
-	output  			VGA_write
+	output  				VGA_write
 	);
 
 	/** local parameters **/
-	localparam 		NO_ACTION 	= 3'b000;
-					ATTACK 		= 3'b001;
-					UP 			= 3'b010;
-					DOWN 		= 3'b011;
-					LEFT 		= 3'b100;
-					RIGHT 		= 3'b101;
+	localparam 	NO_ACTION 	= 3'b000,
+					ATTACK 		= 3'b001,
+					UP 			= 3'b010,
+					DOWN 			= 3'b011,
+					LEFT 			= 3'b100,
+					RIGHT 		= 3'b101,
 
-					F_UP 	= 2'b00,
-					F_DOWN 	= 2'b01,
-					F_LEFT 	= 2'b10,
-					F_RIGHT = 2'b11,
+					ON 			= 1'b1,
+					OFF		 	= 1'b0,
 
-					ON 		= 1'b1,
-					OFF 	= 1'b0,
-
-					MAX_COUNT = 8'b255;
+					MAX_COUNT 	= 8'd255;
 
 	/** ram for enemy character sprites which includes 8 enemy walking sprites **/
 
@@ -82,8 +77,8 @@ module enemy(
 			enemy_y_draw	<= 8'b0;
 			enemy_x_pos		<= 9'b0;
 			enemy_y_pos		<= 8'b0;
-			count			<= 6'b0;
-			enemy_facing	<= F_DOWN;
+			count				<= 6'b0;
+			enemy_facing	<= DOWN;
 			draw_done		<= OFF;
 		end
 		else if(init)
@@ -93,8 +88,8 @@ module enemy(
 			enemy_y_draw	<= 8'b0;
 			enemy_x_pos		<= 8'b0111_1111;
 			enemy_y_pos		<= 8'b0101_1000;
-			count			<= 6'b0;
-			enemy_facing	<= F_DOWN;
+			count				<= 6'b0;
+			enemy_facing	<= DOWN;
 			draw_done		<= OFF;
 		end
 		
@@ -106,14 +101,14 @@ module enemy(
 
 		else if(move_enemies)
 		begin
-			else if(enemy_direction == UP)
+			if(enemy_direction == UP)
 			begin
 				//pull from move up sprites
 				if(!collision)
 				begin
 					enemy_y_pos <= enemy_y_pos - 1'b1;
 				end
-				enemy_facing	<= F_UP;
+				enemy_facing	<= UP;
 				intAddressX		<= 32;
 				intAddressY		<= 0;
 			end
@@ -124,7 +119,7 @@ module enemy(
 				begin
 					enemy_y_pos	<= enemy_y_pos + 1'b1;
 				end
-				enemy_facing	<= F_DOWN;
+				enemy_facing	<= DOWN;
 				intAddressX		<= 0;
 				intAddressY		<= 0;
 			end
@@ -135,7 +130,7 @@ module enemy(
 				begin
 					enemy_x_pos	<= enemy_x_pos - 1'b1;
 				end
-				enemy_facing	<= F_LEFT;
+				enemy_facing	<= LEFT;
 				intAddressX		<= 16;
 				intAddressY		<= 0;
 			end
@@ -146,7 +141,7 @@ module enemy(
 				begin
 					enemy_x_pos	<= enemy_x_pos + 1'b1;
 				end
-				enemy_facing 	<= F_RIGHT;
+				enemy_facing 	<= RIGHT;
 				intAddressX 	<= 48;
 				intAddressY 	<= 0;
 			end

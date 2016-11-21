@@ -20,32 +20,32 @@ module datapath(
 	input 			draw_link, 			//DRAW LINK SIGNAL 				FROM CONTROL
 	input 			draw_enemies, 		//DRAW ENEMY SIGNAL 			FROM CONTROL
 	
-	output 	reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
-	output  reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
-	output 	reg		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
-	output 	reg		VGA_enable,			//WRITE ENABLE SIGNAL 			FOR VGA
+	output reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
+	output reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
+	output reg		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
+	output reg		VGA_enable,			//WRITE ENABLE SIGNAL 			FOR VGA
 
 	//probably don't need the commented out signals
-	output			idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
+	output reg		idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
 	//output 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FOR CONTROL
 	//output 		check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
 	output 		  	draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
-	output 			draw_link_done 		//DRAW DONE SIGNAL 				FOR CONTROL
+	output 			draw_link_done, 		//DRAW DONE SIGNAL 				FOR CONTROL
 	output 			draw_enemies_done 	//DRAW DONE SIGNAL 				FOR CONTROL
 	);
 	
 	/** parameters **/
-	localparam 		MAX_FRAME_COUNT = 21'd1000000, 	//count for for 50 fps 50MHz/50
+	localparam 	MAX_FRAME_COUNT = 21'd1000000, 	//count for for 50 fps 50MHz/50
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
 					UP 				= 3'b010,
-					DOWN 			= 3'b011,
-					LEFT 			= 3'b100,
+					DOWN 				= 3'b011,
+					LEFT 				= 3'b100,
 					RIGHT 			= 3'b101,
 					//on-off
 					ON 				= 1'b1,
-					OFF 			= 1'b0;
+					OFF 				= 1'b0;
 
 	/** wire and register declarations go here **/
 	//map signal wires
@@ -61,7 +61,7 @@ module datapath(
 	wire [8:0] link_x_draw;
 	wire [7:0] link_y_draw;
 	wire [2:0] link_direction;
-	wire [1:0] link_facing;
+	wire [2:0] link_facing;
 	wire [5:0] link_colour;
 	wire [1:0] link_collision;
 	wire link_draw_done;
@@ -73,7 +73,7 @@ module datapath(
 	wire [8:0] enemy_x_draw;
 	wire [7:0] enemy_y_draw;
 	wire [2:0] enemy_direction;
-	wire [1:0] enemy_facing;
+	wire [2:0] enemy_facing;
 	wire [5:0] enemy_colour;
 	wire enemy_collision;
 	wire enemy_draw_done;
@@ -115,7 +115,7 @@ module datapath(
 		.c_attack 		(c_attack),
 		.c_up 			(c_up),
 		.c_down			(c_down),
-		.c_left 		(d_left),
+		.c_left 			(c_left),
 		.c_right 		(c_right),
 
 		//enable signal
@@ -124,8 +124,6 @@ module datapath(
 		.reg_action 	(gen_move),
 		.apply_action	(apply_act_link),
 		.draw_char 		(draw_link),
-
-		.user_input 	(user_input),
 
 		//collision signal , 2bit wire
 		.collision		(link_collision),
@@ -187,32 +185,39 @@ module datapath(
 		.collision_enable 	(check_collide),
 
 		//input position coord for collision calculation
-		.x_char 			(link_x_pos),
-		.y_char 			(link_y_pos),
-		.direction_char		(link_direction),
+		.char_x 				(link_x_pos),
+		.char_y	 			(link_y_pos),
+		.direction_char	(link_direction),
 		.facing_char		(link_facing),
 
-		.x_enemy1 			(enemy_x_pos),
-		.y_enemy1 			(enemy_y_pos),
-		.direction_enemy1 	(enemy_direction),
-		.facing_enemy1 		(enemy_facing),
+		.enemy1_x 			(enemy_x_pos),
+		.enemy1_y 			(enemy_y_pos),
+		.direction_enemy1	(enemy_direction),
+		.facing_enemy1		(enemy_facing),
 
 		//output collision true,false signals
-		c_map_collision		(link_collision[0]),
-		e1_map_collision 	(enemy_collision),
-		c_e1_collision 		(link_collisoin[1]));
+		.c_map_collision		(link_collision[0]),
+		.e1_map_collision 	(enemy_collision),
+		.c_e1_collision 		(link_collision[1]));
 
 	/** combinational logic **/
 	always@(*)
 	begin
 		/* this combinational always block multiplexes the correct
 		   outputs to the VGA for the draw states defined in control */
-
+		if(reset)
+		begin
+			x_position 		<= 9'b0;
+			y_position 		<= 8'b0;
+			colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+		end
+			
 		//draw map state
 		else if((draw_map) && (!draw_map_done))
 		begin
-			x_position 	= map_x_pos;
-			y_position 	= map_y_pos;
+			x_position 	= map_x_draw;
+			y_position 	= map_y_draw;
 			colour 		= map_colour;
 			VGA_enable 	= map_write;
 		end
@@ -251,25 +256,15 @@ module datapath(
 		//synchronous reset
 		if(reset)
 		begin
-			x_position 		<= 9'b0;
-			y_position 		<= 8'b0;
-			colour 			<= 6'b0;
-			VGA_enable 		<= OFF;
 			idle_done 		<= OFF;
 			frame_counter 	<= 21'b0;
-			user_input 		<= NO_ACTION;
 		end
 
 		//initialize registers
 		else if(init)
 		begin
-			x_position 		<= 9'b0;
-			y_position 		<= 8'b0;
-			colour 			<= 6'b0;
-			VGA_enable 		<= OFF;
 			idle_done 		<= OFF;
 			frame_counter 	<= 21'b0;
-			user_input 		<= NO_ACTION;
 		end
 
 		//once idle state is reached, 

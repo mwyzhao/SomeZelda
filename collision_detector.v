@@ -17,19 +17,19 @@ module collision_detector(
 	input reset,
 
 	//enable signal from control
-	input collision_enable;
+	input collision_enable,
 
 	//position for player character
 	input		[8:0] char_x,
 	input		[7:0] char_y,
-	input 		[2:0] direction_char;
-	input 		[2:0] facing_char;
+	input 		[2:0] direction_char,
+	input 		[2:0] facing_char,
 
 	//position for enemies
 	input		[8:0] enemy1_x,
 	input		[7:0] enemy1_y,
-	input 		[2:0] direction_enemy1;
-	input 		[2:0] facing_enemy1;
+	input 		[2:0] direction_enemy1,
+	input 		[2:0] facing_enemy1,
 
 	/* output signals indicating if any collisions have occurred
 	 * set to 1 if true, 0 if false */
@@ -38,7 +38,7 @@ module collision_detector(
 	/* c = player character, e1 = enemy1, e2 = enemy2 */
 	output reg	c_map_collision,
 	output reg	e1_map_collision,
-	output reg	c_e1_collision,
+	output reg	c_e1_collision
 
 	//output reg [1:0] facing_c_out;
 	//output reg [1:0] facing_e_out;
@@ -77,15 +77,15 @@ module collision_detector(
 	reg [7:0] yin_e_br;
 
 
-	reg col_c;
-	reg col_c_tr;
-	reg col_c_bl;
-	reg col_c_br;
+	wire col_c;
+	wire col_c_tr;
+	wire col_c_bl;
+	wire col_c_br;
 
-	reg col_e;
-	reg col_e_tr;
-	reg col_e_bl;
-	reg col_e_br;
+	wire col_e;
+	wire col_e_tr;
+	wire col_e_bl;
+	wire col_e_br;
 
 	reg [8:0] diff_x;
 	reg [7:0] diff_y;
@@ -178,8 +178,8 @@ module collision_detector(
 	always@(*)begin
 		
 		//LINK!!!!!!!! woahhh
-		diff_x = (char_x > enemy1_x)?(char_x - enemy1_x):(enemy_x-char_x);
-		diff_y = (char_y > enemy1_y)?(char_y - enemy1_y):(enemy_y-char_y);
+		diff_x = (char_x > enemy1_x)?(char_x - enemy1_x):(enemy1_x-char_x);
+		diff_y = (char_y > enemy1_y)?(char_y - enemy1_y):(enemy1_y-char_y);
 		if(direction_char == UP)begin
 			xin_c = char_x;
 			xin_c_tr = char_x + 16;
@@ -283,7 +283,7 @@ module collision_detector(
 			end
 
 		
-		if(collision_enable&& (!(&{col_e,col_e_tr, col_e_bl, col_e_br})||!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
+		if(collision_enable&& (!(&{col_e,col_e_tr, col_e_bl, col_e_br}))||!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
 			if(!(&{col_e,col_e_tr, col_e_bl, col_e_br})) begin
 				e1_map_collision = ON;
 				//facing_e_out = direction_enemy1;
@@ -312,5 +312,3 @@ module collision_detector(
 	
 
 endmodule
-
-*/

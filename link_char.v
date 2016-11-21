@@ -19,20 +19,20 @@ module link_char(
 	input 				draw_char,
 
 	//collision signal from collision_detector
-	input 		  [1:0] collision,
+	input 		[1:0] collision,
 
 	//link position for collision_detector and vga
-	output reg 	  [8:0] link_x_pos,
-	output reg 	  [7:0] link_y_pos,
-	output reg 	  [8:0] link_x_draw,
-	output reg 	  [7:0] link_y_draw,
+	output reg 	[8:0] link_x_pos,
+	output reg 	[7:0] link_y_pos,
+	output reg 	[8:0] link_x_draw,
+	output reg 	[7:0] link_y_draw,
 
 	//link direction data for collision_detector
-	output reg 	  [2:0] link_direciton,
-	output reg 	  [1:0] link_facing,
+	output reg 	[2:0] link_direction,
+	output reg 	[2:0] link_facing,
 
 	//memory output data for vga
-	output 	 	  [5:0] colour,
+	output 	 	[5:0] colour,
 
 	//output finished signals
 	output reg 			draw_done,
@@ -42,22 +42,17 @@ module link_char(
 	);
 
 	/** local parameters **/
-	localparam 		NO_ACTION 	= 3'b000;
-					ATTACK 		= 3'b001;
-					UP 			= 3'b010;
-					DOWN 		= 3'b011;
-					LEFT 		= 3'b100;
-					RIGHT 		= 3'b101;
+	localparam 	NO_ACTION 	= 3'b000,
+					ATTACK 		= 3'b001,
+					UP 			= 3'b010,
+					DOWN 			= 3'b011,
+					LEFT 			= 3'b100,
+					RIGHT 		= 3'b101,
 
-					F_UP 	= 2'b00,
-					F_DOWN 	= 2'b01,
-					F_LEFT 	= 2'b10,
-					F_RIGHT = 2'b11,
+					ON				= 1'b1,
+					OFF			= 1'b0,
 
-					ON 		= 1'b1,
-					OFF 	= 1'b0,
-
-					MAX_COUNT = 8'b255;
+					MAX_COUNT	= 8'd255;
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
@@ -90,7 +85,8 @@ module link_char(
 			link_x_pos 	<= 9'b0;
 			link_y_pos 	<= 8'b0;
 			count 	 	<= 6'b0;
-			link_facing <= F_DOWN;
+			link_facing <= DOWN;
+			link_direction <= NO_ACTION;
 			draw_done 	<= OFF;
 		end
 		else if(init)
@@ -101,7 +97,8 @@ module link_char(
 			link_x_pos	<= 8'b0111_1111;
 			link_y_pos	<= 8'b0101_1000;
 			count  		<= 6'b0;
-			link_facing <= F_DOWN;
+			link_facing <= DOWN;
+			link_direction <= NO_ACTION;
 			draw_done 	<= OFF;
 		end
 		
@@ -129,14 +126,14 @@ module link_char(
 				//pull from attack sprites
 			end
 			*/
-			else if(link_direction == UP)
+			if(link_direction == UP)
 			begin
 				//pull from move up sprites
 				if(!collision[0])
 				begin
 					link_y_pos 	<= link_y_pos - 1'b1;
 				end
-				link_facing <= F_UP;
+				link_facing <= UP;
 				intAddressX <= 32;
 				intAddressY <= 0;
 			end
@@ -147,7 +144,7 @@ module link_char(
 				begin
 					link_y_pos 	<= link_y_pos + 1'b1;
 				end
-				link_facing	<= F_DOWN;
+				link_facing	<= DOWN;
 				intAddressX <= 0;
 				intAddressY <= 0;
 			end
@@ -158,7 +155,7 @@ module link_char(
 				begin
 					link_x_pos	<= link_x_pos - 1'b1;
 				end
-				link_facing <= F_LEFT;
+				link_facing <= LEFT;
 				intAddressX <= 16;
 				intAddressY <= 0;
 			end
@@ -169,7 +166,7 @@ module link_char(
 				begin
 					link_x_pos	<= link_x_pos + 1'b1;
 				end
-				link_facing <= F_RIGHT;
+				link_facing <= RIGHT;
 				intAddressX <= 48;
 				intAddressY <= 0;
 			end
@@ -197,9 +194,10 @@ module link_char(
 				draw_done 	<= ON;
 			end
 		end
+		
 		else
 		begin
-			draw_done <=OFF;
+			draw_done <= OFF;
 		end
 	end
 
