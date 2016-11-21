@@ -8,12 +8,6 @@
 
 c5_pin_model_dump.txt
 
-
-
-#backup memory files
-resources/*.qip
-resources/*bb.v
-
 #no quartus project files
 
 *.cdf
@@ -38,4 +32,4 @@ output_files/
 simulation/
 
 #register sof programming file
-!output_files/zelda_game.sof
+!output_files/*.sof
