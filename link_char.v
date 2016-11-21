@@ -6,21 +6,25 @@ module link_char(
 	//state signals from control
 	input 				init,
 	input 				idle,
-	input 				reg_action,
 	input 				apply_action,
 	input 				draw_char,
+
 	input 		  [2:0] user_input,
+
 	input 		  [1:0] collision,
-	//position of memory to be changed as character is updated into memory
-	//8 and 7 bits as it will never exceed map bounds (256x176)
+
 	output reg 	  [8:0] link_x_pos,
 	output reg 	  [7:0] link_y_pos,
 	output reg 	  [8:0] link_x_draw,
 	output reg 	  [7:0] link_y_draw,
+
 	output reg 	  [1:0] link_facing,
+
 	output 	 	  [5:0] cout,
+
 	//output finished signals
 	output reg 			draw_done,
+
 	//output write enable to VGA (do we need this?)
 	output  			VGA_write
 	);
@@ -54,25 +58,12 @@ module link_char(
 	reg [3:0] spriteAddressY;
 	reg [5:0] intAddressX;
 	reg [3:0] intAddressY;
-	/** position registers for player character link **/
-	
-	//link_pos is the x,y coord of link's character sprite (top left corner of image)
-	reg 	[8:0] x_pos;
-	reg		[7:0] y_pos;
-	
-	//direction register as defined by localparam
-	//this is to be used by attack state
-	reg 	[1:0] facing;
 
+	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
 
 	assign VGA_write = (draw_char)&&(cout!=6'b111111);
-
-	//combinational logic
-	always@(*)
-	begin
-		if()
 
 	//sequential logic
 	always@(posedge clock)
@@ -82,10 +73,10 @@ module link_char(
 			//reset block, resets all registers to 0;
 			link_x_draw <= 8'b0;
 			link_y_draw <= 8'b0;
-			x_pos 		<= 8'b0;
-			y_pos 		<= 8'b0;
-			direction 	<= DOWN;
+			link_x_pos 	<= 8'b0;
+			link_y_pos 	<= 8'b0;
 			count 	 	<= 6'b0;
+			link_facing <= F_DOWN;
 			draw_done 	<= OFF;
 		end
 		else if(init)
@@ -93,11 +84,11 @@ module link_char(
 			//initialize first time character appears on map
 			link_x_draw <= 8'b0;
 			link_y_draw <= 8'b0;
-			x_pos 		<= 8'b0111_1111;
-			y_pos 		<= 8'b0101_1000;
-			direction 	<= DOWN;
+			link_x_pos	<= 8'b0111_1111;
+			link_y_pos	<= 8'b0101_1000;
 			count  		<= 6'b0;
-			facing 		<= DOWN;
+			link_facing <= F_DOWN;
+			draw_done 	<= OFF;
 		end
 		
 		else if(apply_action)
