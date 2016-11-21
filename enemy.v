@@ -6,145 +6,156 @@
 module enemy(
 	input clock,
 	input reset,
+
 	//state signals from control
 	input 				init,
 	input 				idle,
-	input 				attack,
-	input 				move_up,
-	input 				move_down,
-	input 				move_left,
-	input 				move_right,
-	input 				draw_char,
-	//position of memory to be changed as character is updated into memory
-	//8 and 7 bits as it will never exceed map bounds (256x176)
-	output reg 	  [8:0] link_x_draw,
-	output reg 	  [7:0] link_y_draw,
-	output 	 	  [5:0] cout,
+	input 				gen_move,
+	input 				move_enemies,
+	input 				draw_enemies,
+
+	//collision signal from collision_detector
+	input 		  		collision,
+
+	//enemy position for collision_detector and vga
+	output reg 	[8:0] enemy_x_pos,
+	output reg 	[7:0] enemy_y_pos,
+	output reg 	[8:0] enemy_x_draw,
+	output reg 	[7:0] enemy_y_draw,
+
+	//enemy direction data for collision_detector
+	output reg 	[2:0] enemy_direction,
+	output reg 	[2:0] enemy_facing,
+
+	//memory output data for vga
+	output 	 	[5:0] colour,
+
 	//output finished signals
 	output reg 			draw_done,
 	//output write enable to VGA (do we need this?)
-	output  			VGA_write
+	output  				VGA_write
 	);
-	
+
 	/** local parameters **/
-	localparam 		UP 		= 2'b00,
-					DOWN 	= 2'b01,
-					LEFT 	= 2'b10,
-					RIGHT 	= 2'b11,
+	localparam 	NO_ACTION 	= 3'b000,
+					ATTACK 		= 3'b001,
+					UP 			= 3'b010,
+					DOWN 			= 3'b011,
+					LEFT 			= 3'b100,
+					RIGHT 		= 3'b101,
 
-					ON 		= 1'b1,
-					OFF 	= 1'b0,
+					ON 			= 1'b1,
+					OFF		 	= 1'b0,
 
-					MAX_COUNT = 8'b11111111;
+					MAX_COUNT 	= 8'd255;
 
-	/** ram for link character sprites which includes
-		8 link walking sprites and 8 link attacking sprites **/
+	/** ram for enemy character sprites which includes 8 enemy walking sprites **/
 
-	link_sprite_mem m0(
+	enemy_sprite_mem m0(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
-		.q(cout));
+		.q(colour));
 
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
 	reg [5:0] intAddressX;
 	reg [3:0] intAddressY;
-	/** position registers for player character link **/
-	
-	//link_pos is the x,y coord of link's character sprite (top left corner of image)
-	reg 	[8:0] x_pos;
-	reg		[7:0] y_pos;
-	
-	//direction register as defined by localparam
-	//this is to be used by attack state
-	reg 	[1:0] direction;
+	/** position registers for enemies**/
 
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
-	reg [1:0] facing;
-	assign VGA_write = (draw_char)&&(cout!=6'b111111);
+
+	assign VGA_write = (draw_enemies) && (colour != 6'b111111);
+
+	//sequential logic
 	always@(posedge clock)
 	begin
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
-			link_x_draw <= 8'b0;
-			link_y_draw <= 8'b0;
-			x_pos 		<= 8'b0;
-			y_pos 		<= 8'b0;
-			direction 	<= DOWN;
-			count 	 	<= 6'b0;
-			draw_done 	<= OFF;
+			enemy_x_draw	<= 9'b0;
+			enemy_y_draw	<= 8'b0;
+			enemy_x_pos		<= 9'b0;
+			enemy_y_pos		<= 8'b0;
+			count				<= 6'b0;
+			enemy_facing	<= DOWN;
+			draw_done		<= OFF;
 		end
 		else if(init)
 		begin
 			//initialize first time character appears on map
-			link_x_draw <= 8'b0;
-			link_y_draw <= 8'b0;
-			x_pos 		<= 8'b0111_1111;
-			y_pos 		<= 8'b0101_1000;
-			direction 	<= DOWN;
-			count  		<= 6'b0;
-			facing 		<= DOWN;
+			enemy_x_draw	<= 8'b0;
+			enemy_y_draw	<= 8'b0;
+			enemy_x_pos		<= 8'b0111_1111;
+			enemy_y_pos		<= 8'b0101_1000;
+			count				<= 6'b0;
+			enemy_facing	<= DOWN;
+			draw_done		<= OFF;
 		end
-		/*
-		else if(idle)
+		
+		else if(gen_move)
 		begin
-			//we probably don't even need this
+			//logic to generate moves, for now move left
+			enemy_direction		<= LEFT;
 		end
-		else if(attack)
+
+		else if(move_enemies)
 		begin
-			//pull from attack sprites
+			if(enemy_direction == UP)
+			begin
+				//pull from move up sprites
+				if(!collision)
+				begin
+					enemy_y_pos <= enemy_y_pos - 1'b1;
+				end
+				enemy_facing	<= UP;
+				intAddressX		<= 32;
+				intAddressY		<= 0;
+			end
+			else if(enemy_direction == DOWN)
+			begin
+				//pull from move down sprites
+				if(!collision)
+				begin
+					enemy_y_pos	<= enemy_y_pos + 1'b1;
+				end
+				enemy_facing	<= DOWN;
+				intAddressX		<= 0;
+				intAddressY		<= 0;
+			end
+			else if(enemy_direction == LEFT)
+			begin
+				//pull from move left sprites
+				if(!collision)
+				begin
+					enemy_x_pos	<= enemy_x_pos - 1'b1;
+				end
+				enemy_facing	<= LEFT;
+				intAddressX		<= 16;
+				intAddressY		<= 0;
+			end
+			else if(enemy_direction == RIGHT)
+			begin
+				//pull from move right sprites
+				if(!collision)
+				begin
+					enemy_x_pos	<= enemy_x_pos + 1'b1;
+				end
+				enemy_facing 	<= RIGHT;
+				intAddressX 	<= 48;
+				intAddressY 	<= 0;
+			end
 		end
-		*/
-		else if(move_up)
-		begin
-			//pull from move up sprites
-			direction 	<= UP;
-			y_pos 		<= y_pos - 1'b1;
-			facing 		<= UP;
-			intAddressX <= 32;
-			intAddressY <= 0;
-		end
-		else if(move_down)
-		begin
-			//pull from move down sprites
-			direction 	<= DOWN;
-			y_pos 		<= y_pos + 1'b1;
-			facing 		<= DOWN;
-			intAddressX  <= 0;
-			intAddressY <= 0;
-		end
-		else if(move_left)
-		begin
-			//pull from move left sprites
-			direction 	<= LEFT;
-			x_pos 		<= x_pos - 1'b1;
-			facing 		<= LEFT;
-			intAddressX  <= 16;
-			intAddressY <= 0;
-		end
-		else if(move_right)
-		begin
-			//pull from move right sprites
-			direction 	<= RIGHT;
-			x_pos 		<= x_pos + 1'b1;
-			facing 		<= RIGHT;
-			intAddressX  <= 48;
-			intAddressY <= 0;
-		end
-		else if(draw_char)
+
+		else if(draw_enemies)
 		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
-			
-			
-				
-			spriteAddressX <= intAddressX +  count[3:0];
-			spriteAddressY <= intAddressY +  count[7:4];
+			spriteAddressX <= intAddressX + count[3:0];
+			spriteAddressY <= intAddressY + count[7:4];
 			//increment x and y positions
-			link_x_draw <= x_pos +  count[3:0];
-			link_y_draw <= y_pos +count[7:4];
+			enemy_x_draw <= enemy_x_pos + count[3:0];
+			enemy_y_draw <= enemy_y_pos + count[7:4];
 			//increment counter
 			count 		<= count + 1'b1;
 
