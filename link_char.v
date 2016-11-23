@@ -5,31 +5,31 @@ module link_char(
 	input reset,
 
 	//user commands from KEY,SW
-	input 				c_attack,
-	input 				c_up,
-	input 				c_down,
-	input 				c_left,
-	input 				c_right,
+	input 			c_attack,
+	input 			c_up,
+	input 			c_down,
+	input 			c_left,
+	input 			c_right,
 
 	//state signals from control
-	input 				init,
-	input 				idle,
-	input 				reg_action,
-	input 				apply_action,
-	input 				draw_char,
+	input 			init,
+	input 			idle,
+	input 			reg_action,
+	input 			apply_action,
+	input 			draw,
 
 	//collision signal from collision_detector
 	input 		[1:0] collision,
 
 	//link position for collision_detector and vga
-	output reg 	[8:0] link_x_pos,
-	output reg 	[7:0] link_y_pos,
-	output reg 	[8:0] link_x_draw,
-	output reg 	[7:0] link_y_draw,
+	output reg 	[8:0] x_pos,
+	output reg 	[7:0] y_pos,
+	output reg 	[8:0] x_draw,
+	output reg 	[7:0] y_draw,
 
 	//link direction data for collision_detector
-	output reg 	[2:0] link_direction,
-	output reg 	[2:0] link_facing,
+	output reg 	[2:0] direction,
+	output reg 	[2:0] facing,
 
 	//memory output data for vga
 	output 	 	[5:0] colour,
@@ -65,14 +65,13 @@ module link_char(
 	/** registers and wires **/
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
-	reg [5:0] intAddressX;
-	reg [3:0] intAddressY;
+	reg [5:0] intAddress;
 
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
 
-	assign VGA_write = (draw_char) && (colour != 6'b111111);
+	assign VGA_write = (draw) && (colour != 6'b111111);
 
 	//sequential logic
 	always@(posedge clock)
@@ -80,107 +79,104 @@ module link_char(
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
-			link_x_draw <= 9'b0;
-			link_y_draw <= 8'b0;
-			link_x_pos 	<= 9'd1;
-			link_y_pos 	<= 8'd96;
+			x_draw <= 9'b0;
+			y_draw <= 8'b0;
+			x_pos 	<= 9'd1;
+			y_pos 	<= 8'd96;
 			count 	 	<= 6'b0;
-			link_facing <= DOWN;
-			link_direction <= NO_ACTION;
+			facing <= DOWN;
+			direction <= NO_ACTION;
 			draw_done 	<= OFF;
 		end
 		else if(init)
 		begin
 			//initialize first time character appears on map
-			link_x_draw <= 8'b0;
-			link_y_draw <= 8'b0;
-			link_x_pos	<= 9'd1;
-			link_y_pos	<= 8'd96;
+			x_draw <= 8'b0;
+			y_draw <= 8'b0;
+			x_pos	<= 9'd1;
+			y_pos	<= 8'd96;
 			count  		<= 6'b0;
-			link_facing <= DOWN;
-			link_direction <= NO_ACTION;
+			facing <= DOWN;
+			direction <= NO_ACTION;
 			draw_done 	<= OFF;
 		end
 		
 		else if(reg_action)
 		begin
 			if(c_attack)
-				link_direction <= ATTACK;
+				direction <= ATTACK;
 			else if(c_up)
-				link_direction <= UP;
+				direction <= UP;
 			else if(c_down)
-				link_direction <= DOWN;
+				direction <= DOWN;
 			else if(c_left)
-				link_direction <= LEFT;
+				direction <= LEFT;
 			else if(c_right)
-				link_direction <= RIGHT;
+				direction <= RIGHT;
 			else
-				link_direction <= NO_ACTION;
+				direction <= NO_ACTION;
 		end
 
 		else if(apply_action)
 		begin
 			/*
-			else if(link_direction == ATTACK)
+			else if(direction == ATTACK)
 			begin
 				//pull from attack sprites
 			end
 			*/
-			if(link_direction == UP)
+			if(direction == UP)
 			begin
 				//pull from move up sprites
 				if(!collision[0])
 				begin
-					link_y_pos 	<= link_y_pos - 1'b1;
+					y_pos 	<= y_pos - 1'b1;
 				end
-				link_facing <= UP;
-				intAddressX <= 32;
-				intAddressY <= 0;
+				facing <= UP;
+				intAddress <= 32;
 			end
-			else if(link_direction == DOWN)
+			else if(direction == DOWN)
 			begin
 				//pull from move down sprites
 				if(!collision[0])
 				begin
-					link_y_pos 	<= link_y_pos + 1'b1;
+					y_pos 	<= y_pos + 1'b1;
 				end
-				link_facing	<= DOWN;
-				intAddressX <= 0;
-				intAddressY <= 0;
+				facing	<= DOWN;
+				intAddress <= 0;
 			end
-			else if(link_direction == LEFT)
+			else if(direction == LEFT)
 			begin
 				//pull from move left sprites
 				if(!collision[0])
 				begin
-					link_x_pos	<= link_x_pos - 1'b1;
+					x_pos	<= x_pos - 1'b1;
 				end
-				link_facing <= LEFT;
-				intAddressX <= 16;
-				intAddressY <= 0;
+				facing <= LEFT;
+				intAddress <= 16;
 			end
-			else if(link_direction == RIGHT)
+			else if(direction == RIGHT)
 			begin
 				//pull from move right sprites
 				if(!collision[0])
 				begin
-					link_x_pos	<= link_x_pos + 1'b1;
+					x_pos	<= x_pos + 1'b1;
 				end
-				link_facing <= RIGHT;
-				intAddressX <= 48;
-				intAddressY <= 0;
+				facing <= RIGHT;
+				intAddress <= 48;
 			end
 		end
 
-		else if(draw_char)
+		else if(draw
+)
 		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
-			spriteAddressX <= intAddressX + count[3:0];
-			spriteAddressY <= intAddressY + count[7:4];
+			spriteAddressX <= intAddress + count[3:0];
+			spriteAddressY <= count[7:4];
 			//increment x and y positions
-			link_x_draw <= link_x_pos + count[3:0];
-			link_y_draw <= link_y_pos + count[7:4];
+			x_draw <= x_pos + count[3:0];
+			y_draw <= y_pos + count[7:4];
 			//increment counter
 			count 		<= count + 1'b1;
 

@@ -11,8 +11,8 @@ module enemy(
 	input 			init,
 	input 			idle,
 	input 			gen_move,
-	input 			move_enemies,
-	input 			draw_enemies,
+	input 			apply_move,
+	input 			draw,
 
 	//collision signal from collision_detector
 	input 	  		collision,
@@ -83,7 +83,7 @@ module enemy(
 	reg 	[7:0] count;
 
 	//do not draw white sprite background colours
-	assign VGA_write = (draw_enemies) && (colour != 6'b111111);
+	assign VGA_write = (draw) && (colour != 6'b111111);
 
 	//sequential logic
 	always@(posedge clock)
@@ -141,7 +141,7 @@ module enemy(
 			end
 		end
 
-		else if(move_enemies)
+		else if(apply_move)
 		begin
 			if(direction == UP)
 			begin
@@ -185,7 +185,7 @@ module enemy(
 			end
 		end
 
-		else if(draw_enemies)
+		else if(draw)
 		begin
 			spriteAddressX <= intAddress + count[3:0];
 			spriteAddressY <= count[7:4];

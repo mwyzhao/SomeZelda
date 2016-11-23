@@ -118,25 +118,25 @@ module datapath(
 		.c_left 			(c_left),
 		.c_right 		(c_right),
 
-		//enable signal
+		//state signals
 		.init 			(init),
 		.idle 			(idle),
 		.reg_action 	(gen_move),
 		.apply_action	(apply_act_link),
-		.draw_char 		(draw_link),
+		.draw			(draw_link),
 
 		//collision signal , 2bit wire
 		.collision		(link_collision),
 
 		//link position coordinates
-		.link_x_pos 	(link_x_pos),
-		.link_y_pos 	(link_y_pos),
-		.link_x_draw 	(link_x_draw),
-		.link_y_draw 	(link_y_draw),
+		.x_pos 			(link_x_pos),
+		.y_pos 			(link_y_pos),
+		.x_draw 		(link_x_draw),
+		.y_draw 		(link_y_draw),
 
 		//link facing information
-		.link_direction (link_direction),
-		.link_facing 	(link_facing),
+		.direction		(link_direction),
+		.facing			(link_facing),
 
 		//data to load into VGA
 		.colour			(link_colour),
@@ -151,13 +151,14 @@ module datapath(
 		.clock 			(clock),
 		.reset 			(reset),
 
+		//state signals
 		.init 			(init),
 		.idle 			(idle),
 		.gen_move 		(gen_move),
-		.move_enemies 	(move_enemies),
-		.draw_enemies 	(draw_enemies),
+		.apply_move		(move_enemies),
+		.draw			(draw_enemies),
 
-		//see description in link module
+		//collision signal
 		.collision 		(enemy_collision),
 
 		//link position coordinates for movement
