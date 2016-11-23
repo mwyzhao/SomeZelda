@@ -35,7 +35,7 @@ module datapath(
 	);
 	
 	/** parameters **/
-	localparam 	MAX_FRAME_COUNT = 24'd833333, 	//count for for 50 fps 50MHz/50
+	parameter 	MAX_FRAME_COUNT = 24'd1666666, 	//count for for 30 fps 50MHz/30
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -197,8 +197,8 @@ module datapath(
 
 		//output collision true,false signals
 		.c_map_collision		(link_collision[0]),
-		.e1_map_collision 	(enemy_collision),
-		.c_e1_collision 		(link_collision[1]));
+		.c_e1_collision 		(link_collision[1])
+		.e1_map_collision 	(enemy_collision),);
 
 	/** combinational logic **/
 	always@(*)
@@ -277,13 +277,13 @@ module datapath(
 				frame_counter 	<= 24'b0;
 			end
 		end
-
-		//always increment counter and set done signals to off
+		//if out of idle state reset idle_done
 		else
 		begin
 			idle_done 		<= OFF;
 		end
-		
+
+		//always increment counter
 		frame_counter 	<= frame_counter + 1'b1;
 	end
 
