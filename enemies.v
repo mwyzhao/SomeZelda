@@ -19,22 +19,23 @@ module enemies(
 	//enemy position for collision_detector and vga
 	output reg [8:0] enemy_1_x_pos,
 	output reg [7:0] enemy_1_y_pos,
-	output reg [8:0] enemy_1_x_draw,
-	output reg [7:0] enemy_1_y_draw,
+
 	output reg [8:0] enemy_2_x_pos,
 	output reg [7:0] enemy_2_y_pos,
-	output reg [8:0] enemy_2_x_draw,
-	output reg [7:0] enemy_2_y_draw,
+
 	output reg [8:0] enemy_3_x_pos,
 	output reg [7:0] enemy_3_y_pos,
-	output reg [8:0] enemy_3_x_draw,
-	output reg [7:0] enemy_3_y_draw,
+
+	output reg [8:0] x_draw,
+	output reg [7:0] y_draw,
 
 	//enemy direction data for collision_detector
 	output reg [2:0] enemy_1_direction,
 	output reg [2:0] enemy_1_facing,
+
 	output reg [2:0] enemy_2_direction,
 	output reg [2:0] enemy_2_facing,
+
 	output reg [2:0] enemy_3_direction,
 	output reg [2:0] enemy_3_facing,
 
@@ -59,7 +60,29 @@ module enemies(
 		.q			(colour));
 
 	/** wires and registers **/
+	//draw enable signals for each enemy module
+	reg draw_1, draw_2, draw_3;
 
+	//wires for each enemies
+	reg [8:0] enemy_1_x_draw;
+	reg [7:0] enemy_1_y_draw;
+	wire colour_1;
+	wire VGA_write_1;
+	wire draw_done_1;
+
+	reg [8:0] enemy_2_x_draw;
+	reg [7:0] enemy_2_y_draw;
+	wire colour_2;
+	wire VGA_write_2;
+	wire draw_done_2;
+
+	reg [8:0] enemy_3_x_draw;
+	reg [7:0] enemy_3_y_draw;
+	wire colour_3;
+	wire VGA_write_3;
+	wire draw_down_3;
+
+	/** enemy modules **/
 	//enemy 1
 	single_enemy enemy_1(
 		.clock		(clock),
@@ -160,6 +183,8 @@ module enemies(
 			//connect colour and VGA_write to enemy 1 while drawing
 			if(!draw_done_1)
 			begin
+				x_draw = enemy_1_x_draw;
+				y_draw = enemy_1_y_draw;
 				colour = colour_1;
 				VGA_write = VGA_write_1;
 			end
@@ -170,6 +195,8 @@ module enemies(
 				//connect colour and VGA_write to enemy 2 while drawing
 				if(!draw_done_2)
 				begin
+					x_draw = enemy_1_x_draw;
+					y_draw = enemy_1_y_draw;
 					colour = colour_2;
 					VGA_write = VGA_write_2;
 				end
@@ -180,6 +207,8 @@ module enemies(
 				//connect colour and VGA_write to enemy 3 while drawing
 				if(!draw_done_3)
 				begin
+					x_draw = enemy_1_x_draw;
+					y_draw = enemy_1_y_draw;
 					colour = colour_3;
 					VGA_write = VGA_write_3;
 				end
