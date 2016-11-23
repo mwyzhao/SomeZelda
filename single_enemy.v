@@ -31,13 +31,14 @@ module enemy(
 	output reg 	[2:0] direction,
 	output reg 	[2:0] facing,
 
-	//memory output data for vga
+	//memory output data for VGA
 	output 	 	[5:0] colour,
+
+	//output write enable to VGA
+	output  				VGA_write
 
 	//output finished signals
 	output reg 			draw_done,
-	//output write enable to VGA (do we need this?)
-	output  				VGA_write
 	);
 
 	/** local parameters **/

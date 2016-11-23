@@ -62,10 +62,10 @@ module datapath(
 	wire [7:0] link_y_draw;
 	wire [2:0] link_direction;
 	wire [2:0] link_facing;
-	wire [5:0] link_colour;
 	wire [1:0] link_collision;
-	wire link_draw_done;
+	wire [5:0] link_colour;
 	wire link_write;
+	wire link_draw_done;
 
 	//enemy signal wires
 	wire [8:0] enemy_x_pos;
@@ -74,10 +74,10 @@ module datapath(
 	wire [7:0] enemy_y_draw;
 	wire [2:0] enemy_direction;
 	wire [2:0] enemy_facing;
-	wire [5:0] enemy_colour;
 	wire enemy_collision;
-	wire enemy_draw_done;
+	wire [5:0] enemy_colour;
 	wire enemy_write;
+	wire enemy_draw_done;
 
 	//frame counter limits actions to 50Hz
 	//21 bits for overflow safety
@@ -141,11 +141,11 @@ module datapath(
 		//data to load into VGA
 		.colour			(link_colour),
 
-		//link output finished signal
-		.draw_done 		(draw_link_done),
-
 		//VGA write enable
-		.VGA_write 		(link_write));
+		.VGA_write 		(link_write)		
+
+		//link output finished signal
+		.draw_done 		(draw_link_done));
 
 	single_enemy blob_things(
 		.clock 			(clock),
@@ -178,9 +178,9 @@ module datapath(
 		//data to load into VGA
 		.colour	 		(enemy_colour),
 
-		.draw_done 		(draw_enemies_done),
+		.VGA_write 		(enemy_write),
 
-		.VGA_write 		(enemy_write));
+		.draw_done 		(draw_enemies_done));
 	
 	collision_detector cd(
 		.clock 				(clock),

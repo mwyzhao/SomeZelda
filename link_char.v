@@ -34,11 +34,11 @@ module link_char(
 	//memory output data for vga
 	output 	 	[5:0] colour,
 
+	//output write enable to VGA
+	output  			VGA_write	
+
 	//output finished signals
 	output reg 			draw_done,
-
-	//output write enable to VGA
-	output  			VGA_write
 	);
 
 	/** local parameters **/
