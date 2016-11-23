@@ -1,17 +1,35 @@
 #no .bak files
+
 *.bak
 
+
+
 #no pin dump
+
 c5_pin_model_dump.txt
 
 #no quartus project files
+
+*.cdf
 *.qpf
+
 *.qsf
+
 *.qws
 
+
+
 #no quartus project folders
+
 db/
+
 greybox_tmp/
+
 incremental_db/
+
 output_files/
+
 simulation/
+
+#register sof programming file
+!output_files/*.sof

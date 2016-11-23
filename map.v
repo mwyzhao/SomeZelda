@@ -12,11 +12,6 @@ module map(
 	input 		  [1:0] map_s,
 	*/
 
-	/* may not need if we have default clear it
-	//signal to reset draw_done from control
-	input 				draw_ack;
-	*/
-
 	//output x,y coord to manipulate VGA memory
 	output reg	  [8:0] x_pos,
 	output reg	  [7:0] y_pos,
@@ -32,8 +27,10 @@ module map(
 	);
 
 	/** parameters **/
-	localparam 		MAX_COUNT 	= 17'd76799, 		//number of pixels in 320*240
-					MAX_X 		= 9'd319,					//320
+	parameter 		X_INITIAL	= 5'b31,
+					Y_INITIAL	= 5'b31,
+					MAX_X 		= 8'd255,			//255
+					MAX_COUNT 	= 16'd45055, 		//number of pixels in 256x176 (map size)
 					ON 			= 1'b1,
 					OFF 		= 1'b0;
 
@@ -41,7 +38,7 @@ module map(
 
 	/** memory modules **/
 	map_mem map1(
-		.address		(address),
+		.address		(count),
 		.clock 			(clock),
 		.q				(colour));
 
@@ -52,14 +49,9 @@ module map(
 		.q 				(colour));
 	*/
 
-	vga_address_translator map_address_translator(
-		.x 				(x_pos),
-		.y 				(y_pos),
-		.mem_address 	(address));
-
 	/** register declaractions **/
 	//counters to signify drawing is done
-	reg 	[16:0] count;
+	reg 	[15:0] count;
 
 	/** combinational logic **/
 	assign VGA_write = enable;
@@ -69,9 +61,9 @@ module map(
 	begin
 		if(reset)
 		begin
-			x_pos <= 9'b0;
-			y_pos <= 8'b0;
-			count <= 17'b0;
+			x_pos <= X_INITIAL;
+			y_pos <= Y_INITIAL;
+			count <= 16'b0;
 			draw_done <= OFF;
 		end
 
@@ -88,10 +80,9 @@ module map(
 		begin 
 			if(count == MAX_COUNT)
 			begin
-				/* extra layer of safety */
-				x_pos <= 9'b0;
-				y_pos <= 8'b0;
-				count <= 17'b0;
+				x_pos <= X_INITIAL;
+				y_pos <= Y_INITIAL;
+				count <= 16'b0;
 				draw_done <= ON;
 			end
 			//draw logic here
@@ -99,7 +90,7 @@ module map(
 			begin
 				if(x_pos == MAX_X)
 				begin
-					x_pos <= 9'b0;
+					x_pos <= X_INITIAL;
 					y_pos <= y_pos + 1'b1;
 				end
 				else
@@ -114,11 +105,6 @@ module map(
 		else
 		begin
 			//reset to prepare for next draw cycle
-			/*
-			x_pos <= 9'b0;
-			y_pos <= 8'b0;
-			count <= 16'b0;
-			*/
 			draw_done <= OFF;
 		end
 	end

@@ -22,9 +22,9 @@ module HUD(
 	);
 
 	/** parameters **/
-	localparam		MAX_COUNT 	= 'b ; 					//number of pixels that must be drawn for HUD
-					ON 			= 1'b1,
-					OFF 		= 1'b0;
+	localparam	MAX_COUNT 	= 'b ; 					//number of pixels that must be drawn for HUD
+					ON				= 1'b1,
+					OFF			= 1'b0;
 
 	//might not be needed if we hardcode
 	HUD_mem(...);
