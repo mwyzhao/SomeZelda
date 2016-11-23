@@ -27,8 +27,8 @@ module map(
 	);
 
 	/** parameters **/
-	parameter 		X_INITIAL	= 5'b31,
-					Y_INITIAL	= 5'b31,
+	parameter 		X_INITIAL	= 5'd31,
+					Y_INITIAL	= 5'd31,
 					MAX_X 		= 8'd255,			//255
 					MAX_COUNT 	= 16'd45055, 		//number of pixels in 256x176 (map size)
 					ON 			= 1'b1,
