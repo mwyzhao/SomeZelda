@@ -37,7 +37,7 @@ module enemy(
 	);
 
 	/** local parameters **/
-	localparam 	NO_ACTION 	= 3'b000,
+	parameter 	NO_ACTION 	= 3'b000,
 					ATTACK 		= 3'b001,
 					UP 			= 3'b010,
 					DOWN 			= 3'b011,
@@ -55,11 +55,24 @@ module enemy(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
 		.q(colour));
+	/** random number generator for movement **/
+
+	random_number_generator enemy_move(
+		.clock(clock),
+		.reset(reset),
+		.init(init),
+		.out(movement_interrupt));
+	/* include defparam here in case you want to change internal seed value
+	 * defparam SEED0 = 8'b1001010;
+	 * defparam SEED1 = 8'b0100101;
+	 * two examples of defparam above, available parameters: SEED0 - SEED3
+	 */
+
+	wire [3:0] movement_interrupt;
 
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
-	reg [5:0] intAddressX;
-	reg [3:0] intAddressY;
+	reg [5:0] intAddress;
 	/** position registers for enemies**/
 
 	//counter for when link is finished drawing
@@ -95,8 +108,32 @@ module enemy(
 		
 		else if(gen_move)
 		begin
-			//logic to generate moves, for now move left
-			enemy_direction		<= LEFT;
+			/* will add more sophisticated enemies later */
+			//this is for some added unpredictability in enemy movements
+			//only triggers when random numbers match 11, EV 1/8
+			if(move_interrupt[1:0] == 2'b11)
+			begin
+				if(move_interrupt[3:2] == 2'b00)
+					enemy_direction <= UP;
+				if(move_interrupt[3:2] == 2'b01)
+					enemy_direction <= DOWN;
+				if(move_interrupt[3:2] == 2'b10)
+					enemy_direction <= LEFT;
+				if(move_interrupt[3:2] == 2'b11)
+					enemy_direction <= RIGHT;
+			end
+			//planning to add more so track user position, for now move left
+			else
+			begin
+				if(link_y_pos < enemy_y_pos)
+					enemy_direction	<= UP;
+				else if(link_y_pos > enemy_y_pos)
+					enemy_direction <= DOWN;
+				else if(link_x_pos < enemy_y_pos)
+					enemy_direction <= LEFT;
+				else if(link_x_pos > enemy_y_pos)
+					enemy_direction <= RIGHT;
+			end
 		end
 
 		else if(move_enemies)
@@ -109,8 +146,7 @@ module enemy(
 					enemy_y_pos <= enemy_y_pos - 1'b1;
 				end
 				enemy_facing	<= UP;
-				intAddressX		<= 32;
-				intAddressY		<= 0;
+				intAddress		<= 6'd32;
 			end
 			else if(enemy_direction == DOWN)
 			begin
@@ -120,8 +156,7 @@ module enemy(
 					enemy_y_pos	<= enemy_y_pos + 1'b1;
 				end
 				enemy_facing	<= DOWN;
-				intAddressX		<= 0;
-				intAddressY		<= 0;
+				intAddress		<= 6'd0;
 			end
 			else if(enemy_direction == LEFT)
 			begin
@@ -131,8 +166,7 @@ module enemy(
 					enemy_x_pos	<= enemy_x_pos - 1'b1;
 				end
 				enemy_facing	<= LEFT;
-				intAddressX		<= 16;
-				intAddressY		<= 0;
+				intAddress		<= 6'd16;
 			end
 			else if(enemy_direction == RIGHT)
 			begin
@@ -142,17 +176,14 @@ module enemy(
 					enemy_x_pos	<= enemy_x_pos + 1'b1;
 				end
 				enemy_facing 	<= RIGHT;
-				intAddressX 	<= 48;
-				intAddressY 	<= 0;
+				intAddress	 	<= 6'd48;
 			end
 		end
 
 		else if(draw_enemies)
 		begin
-			//do not need to implement erase if redrawing entire map
-			//set write enable to on
-			spriteAddressX <= intAddressX + count[3:0];
-			spriteAddressY <= intAddressY + count[7:4];
+			spriteAddressX <= intAddress + count[3:0];
+			spriteAddressY <= count[7:4];
 			//increment x and y positions
 			enemy_x_draw <= enemy_x_pos + count[3:0];
 			enemy_y_draw <= enemy_y_pos + count[7:4];
