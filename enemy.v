@@ -8,24 +8,28 @@ module enemy(
 	input reset,
 
 	//state signals from control
-	input 				init,
-	input 				idle,
-	input 				gen_move,
-	input 				move_enemies,
-	input 				draw_enemies,
+	input 			init,
+	input 			idle,
+	input 			gen_move,
+	input 			move_enemies,
+	input 			draw_enemies,
 
 	//collision signal from collision_detector
-	input 		  		collision,
+	input 	  		collision,
+
+	//link position for tracking movement
+	input 			link_x_pos,
+	input			link_y_pos,
 
 	//enemy position for collision_detector and vga
-	output reg 	[8:0] enemy_x_pos,
-	output reg 	[7:0] enemy_y_pos,
-	output reg 	[8:0] enemy_x_draw,
-	output reg 	[7:0] enemy_y_draw,
+	output reg 	[8:0] x_pos,
+	output reg 	[7:0] y_pos,
+	output reg 	[8:0] x_draw,
+	output reg 	[7:0] y_draw,
 
 	//enemy direction data for collision_detector
-	output reg 	[2:0] enemy_direction,
-	output reg 	[2:0] enemy_facing,
+	output reg 	[2:0] direction,
+	output reg 	[2:0] facing,
 
 	//memory output data for vga
 	output 	 	[5:0] colour,
@@ -61,7 +65,7 @@ module enemy(
 		.clock(clock),
 		.reset(reset),
 		.init(init),
-		.out(movement_interrupt));
+		.out(move_interrupt));
 	/* include defparam here in case you want to change internal seed value
 	 * defparam SEED0 = 8'b1001010;
 	 * defparam SEED1 = 8'b0100101;
@@ -78,6 +82,7 @@ module enemy(
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
 
+	//do not draw white sprite background colours
 	assign VGA_write = (draw_enemies) && (colour != 6'b111111);
 
 	//sequential logic
@@ -86,23 +91,23 @@ module enemy(
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
-			enemy_x_draw	<= 9'b0;
-			enemy_y_draw	<= 8'b0;
-			enemy_x_pos		<= 9'd210;
-			enemy_y_pos		<= 8'd96;
+			x_draw		<= 9'b0;
+			y_draw		<= 8'b0;
+			x_pos		<= 9'd210;
+			y_pos		<= 8'd96;
 			count				<= 6'b0;
-			enemy_facing	<= DOWN;
+			facing		<= DOWN;
 			draw_done		<= OFF;
 		end
 		else if(init)
 		begin
 			//initialize first time character appears on map
-			enemy_x_draw	<= 8'b0;
-			enemy_y_draw	<= 8'b0;
-			enemy_x_pos		<= 9'd210;
-			enemy_y_pos		<= 8'd96;
+			x_draw		<= 8'b0;
+			y_draw		<= 8'b0;
+			x_pos		<= 9'd210;
+			y_pos		<= 8'd96;
 			count				<= 6'b0;
-			enemy_facing	<= DOWN;
+			facing		<= DOWN;
 			draw_done		<= OFF;
 		end
 		
@@ -114,68 +119,68 @@ module enemy(
 			if(move_interrupt[1:0] == 2'b11)
 			begin
 				if(move_interrupt[3:2] == 2'b00)
-					enemy_direction <= UP;
+					direction <= UP;
 				if(move_interrupt[3:2] == 2'b01)
-					enemy_direction <= DOWN;
+					direction <= DOWN;
 				if(move_interrupt[3:2] == 2'b10)
-					enemy_direction <= LEFT;
+					direction <= LEFT;
 				if(move_interrupt[3:2] == 2'b11)
-					enemy_direction <= RIGHT;
+					direction <= RIGHT;
 			end
 			//planning to add more so track user position, for now move left
 			else
 			begin
-				if(link_y_pos < enemy_y_pos)
-					enemy_direction	<= UP;
-				else if(link_y_pos > enemy_y_pos)
-					enemy_direction <= DOWN;
-				else if(link_x_pos < enemy_y_pos)
-					enemy_direction <= LEFT;
-				else if(link_x_pos > enemy_y_pos)
-					enemy_direction <= RIGHT;
+				if(link_y_pos < y_pos)
+					direction	<= UP;
+				else if(link_y_pos > y_pos)
+					direction <= DOWN;
+				else if(link_x_pos < y_pos)
+					direction <= LEFT;
+				else if(link_x_pos > y_pos)
+					direction <= RIGHT;
 			end
 		end
 
 		else if(move_enemies)
 		begin
-			if(enemy_direction == UP)
+			if(direction == UP)
 			begin
 				//pull from move up sprites
 				if(!collision)
 				begin
-					enemy_y_pos <= enemy_y_pos - 1'b1;
+					y_pos <= y_pos - 1'b1;
 				end
-				enemy_facing	<= UP;
+				facing	<= UP;
 				intAddress		<= 6'd32;
 			end
-			else if(enemy_direction == DOWN)
+			else if(direction == DOWN)
 			begin
 				//pull from move down sprites
 				if(!collision)
 				begin
-					enemy_y_pos	<= enemy_y_pos + 1'b1;
+					y_pos	<= y_pos + 1'b1;
 				end
-				enemy_facing	<= DOWN;
+				facing	<= DOWN;
 				intAddress		<= 6'd0;
 			end
-			else if(enemy_direction == LEFT)
+			else if(direction == LEFT)
 			begin
 				//pull from move left sprites
 				if(!collision)
 				begin
-					enemy_x_pos	<= enemy_x_pos - 1'b1;
+					x_pos	<= x_pos - 1'b1;
 				end
-				enemy_facing	<= LEFT;
+				facing	<= LEFT;
 				intAddress		<= 6'd16;
 			end
-			else if(enemy_direction == RIGHT)
+			else if(direction == RIGHT)
 			begin
 				//pull from move right sprites
 				if(!collision)
 				begin
-					enemy_x_pos	<= enemy_x_pos + 1'b1;
+					x_pos	<= x_pos + 1'b1;
 				end
-				enemy_facing 	<= RIGHT;
+				facing 	<= RIGHT;
 				intAddress	 	<= 6'd48;
 			end
 		end
@@ -185,8 +190,8 @@ module enemy(
 			spriteAddressX <= intAddress + count[3:0];
 			spriteAddressY <= count[7:4];
 			//increment x and y positions
-			enemy_x_draw <= enemy_x_pos + count[3:0];
-			enemy_y_draw <= enemy_y_pos + count[7:4];
+			x_draw <= x_pos + count[3:0];
+			y_draw <= y_pos + count[7:4];
 			//increment counter
 			count 		<= count + 1'b1;
 

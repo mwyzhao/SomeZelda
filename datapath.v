@@ -160,15 +160,19 @@ module datapath(
 		//see description in link module
 		.collision 		(enemy_collision),
 
+		//link position coordinates for movement
+		.link_x_pos		(link_x_pos),
+		.link_y_pos		(link_y_pos),
+
 		//enemy position coordinates
-		.enemy_x_pos 	(enemy_x_pos),
-		.enemy_y_pos 	(enemy_y_pos),
-		.enemy_x_draw 	(enemy_x_draw),
-		.enemy_y_draw 	(enemy_y_draw),
+		.x_pos 			(enemy_x_pos),
+		.y_pos 			(enemy_y_pos),
+		.x_draw 		(enemy_x_draw),
+		.y_draw 		(enemy_y_draw),
 
 		//enemy direction information
-		.enemy_direction(enemy_direction),
-		.enemy_facing 	(enemy_facing),
+		.direction		(enemy_direction),
+		.facing 		(enemy_facing),
 
 		//data to load into VGA
 		.colour	 		(enemy_colour),
