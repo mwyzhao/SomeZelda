@@ -57,7 +57,7 @@ module link_char(
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
 
-	link_sprite_mem m0(
+	link_sprite_mem link_sprite(
 		.address({spriteAddressY,spriteAddressX}),
 		.clock(clock),
 		.q(colour));
