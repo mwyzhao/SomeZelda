@@ -147,7 +147,7 @@ module datapath(
 		//VGA write enable
 		.VGA_write 		(link_write));
 
-	enemy blob_things(
+	single_enemy blob_things(
 		.clock 			(clock),
 		.reset 			(reset),
 
