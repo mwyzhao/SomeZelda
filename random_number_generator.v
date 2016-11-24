@@ -2,7 +2,7 @@ module random_number_generator(
 	input clock,
 	input reset,
 	input init,
-	output [3:0] out,
+	output [3:0] out
 	);
 
 	parameter	SEED0 = 8'b10010110,
@@ -49,10 +49,10 @@ module fibonacci_lfsr(
 	);
 
 	reg [8:0] data;
-	wire rn = data[8];
+	assign rn = data[8];
 	wire feedback = data[8] ^ data[4] ^ data[1] ;
 
-	always @(posedge clk or negedge rst_n)
+	always @(posedge clk)
   	if (rst) 
     	data <= seed;
   	else if(init)

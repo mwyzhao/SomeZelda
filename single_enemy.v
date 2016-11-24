@@ -3,7 +3,7 @@
 /* not gonna worry about this for now */
 /* shouldn't need to implement this until collision is done */
 
-module enemy(
+module single_enemy(
 	input clock,
 	input reset,
 
@@ -72,7 +72,7 @@ module enemy(
 	 * two examples of defparam above, available parameters: SEED0 - SEED3
 	 */
 
-	wire [3:0] movement_interrupt;
+	wire [3:0] move_interrupt;
 
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;

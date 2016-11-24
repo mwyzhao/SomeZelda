@@ -84,7 +84,7 @@ module map_mem (
 		altsyncram_component.address_aclr_a = "NONE",
 		altsyncram_component.clock_enable_input_a = "BYPASS",
 		altsyncram_component.clock_enable_output_a = "BYPASS",
-		altsyncram_component.init_file = "../../Users/mikha/Desktop/k/School/University of Toronto/ECE 2nd Year/ECE241 Digital Systems/final_project/resources/bmp1.mif",
+		altsyncram_component.init_file = "../resources/bmp1.mif",
 		altsyncram_component.intended_device_family = "Cyclone V",
 		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
 		altsyncram_component.lpm_type = "altsyncram",

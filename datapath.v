@@ -202,8 +202,8 @@ module datapath(
 
 		//output collision true,false signals
 		.c_map_collision		(link_collision[0]),
-		.c_e1_collision 		(link_collision[1])
-		.e1_map_collision 	(enemy_collision),);
+		.c_e1_collision 		(link_collision[1]),
+		.e1_map_collision 	(enemy_collision));
 
 	/** combinational logic **/
 	always@(*)
