@@ -130,9 +130,9 @@ module enemy(
 					direction	<= UP;
 				else if(link_y_pos > y_pos)
 					direction <= DOWN;
-				else if(link_x_pos < y_pos)
+				else if(link_x_pos < x_pos)
 					direction <= LEFT;
-				else if(link_x_pos > y_pos)
+				else if(link_x_pos > x_pos)
 					direction <= RIGHT;
 			end
 		end
