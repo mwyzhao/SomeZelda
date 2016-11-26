@@ -7,6 +7,12 @@ module zelda_game
 		SW,
 		KEY,
 		LEDR,
+		HEX0,
+		HEX1,
+		HEX2,
+		HEX3,
+		HEX4,
+		HEX5,
 		// The ports below are for the VGA output.  Do not change.
 		VGA_CLK,   						//	VGA Clock
 		VGA_HS,							//	VGA H_SYNC
@@ -23,6 +29,12 @@ module zelda_game
 	input 	[9:0] SW;
 	input 	[3:0] KEY;
 	output 	[3:0] LEDR;
+	output 	[6:0] HEX0;
+	output	[6:0] HEX1;
+	output 	[6:0] HEX2;
+	output	[6:0] HEX3;
+	output 	[6:0] HEX4;
+	output	[6:0] HEX5;
 	// Do not change the following outputs
 	output			VGA_CLK;   		//	VGA Clock
 	output			VGA_HS;			//	VGA H_SYNC
@@ -85,7 +97,7 @@ module zelda_game
 	wire apply_act_link, move_enemies;
 	wire draw_map, draw_link, draw_enemies;
 	
-	wire idle_done,draw_map_done, draw_link_done, draw_enemies_done;
+	wire idle_done, check_collide_done, draw_map_done, draw_link_done, draw_enemies_done;
 
 	control C(
 		//inputs
@@ -94,7 +106,7 @@ module zelda_game
 		
 		.idle_done			(idle_done),
 		//.gen_move_done		(gen_move_done),
-		//.check_collide_done	(check_collide_done),
+		.check_collide_done	(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done 	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
@@ -112,6 +124,34 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies));
 
+		wire [3:0] enemy_c,link_c;
+		wire [8:0] link_x_pos;
+		wire [7:0] link_y_pos;
+	
+	hexDecoder Hx1(
+		.bin(link_x_pos[7:4]),
+		.hout(HEX5));
+	
+	hexDecoder Hx2(
+		.bin(link_x_pos[3:0]),
+		.hout(HEX4));
+	
+	hexDecoder Hy1(
+		.bin(link_y_pos[7:4]),
+		.hout(HEX3));
+		
+	hexDecoder Hy2(
+		.bin(link_y_pos[3:0]),
+		.hout(HEX2));
+	
+	hex_decoder h1(
+		.data(enemy_c),
+		.hex(HEX1));
+		
+	hex_decoder h0(
+		.data(link_c),
+		.hex(HEX0));
+		
 	datapath D(
 		//inputs
 		.clock				(CLOCK_50),
@@ -132,6 +172,9 @@ module zelda_game
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
+		
+		.link_x_pos(link_x_pos),
+		.link_y_pos(link_y_pos),
 
 		//outputs
 		.x_position			(x),
@@ -140,10 +183,68 @@ module zelda_game
 		.VGA_enable 		(writeEn),
 
 		.idle_done			(idle_done),
-		//.gen_move_done	(attack_done),
-		//.move_done		(move_done),
+		.check_collide_done(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done	(draw_link_done),
-		.draw_enemies_done(draw_enemies_done));
+		.draw_enemies_done(draw_enemies_done),
+		.testRom({enemy_c,link_c}));
 
 endmodule
+
+module hex_decoder(
+	input [3:0] data,
+	output reg [6:0] hex
+	);
+	
+	always@(*)
+	begin
+		case(data)
+			4'b0000: hex = 7'b1111111;
+			4'b0001: hex = 7'b1101111;
+			4'b0010: hex = 7'b1111011;
+			4'b0011: hex = 7'b1101011;
+			4'b0100: hex = 7'b1011111;
+			4'b0101: hex = 7'b1001111;
+			4'b0110: hex = 7'b1011011;
+			4'b0111: hex = 7'b1001011;
+			4'b1000: hex = 7'b1111101;
+			4'b1001: hex = 7'b1101101;
+			4'b1010: hex = 7'b1111001;
+			4'b1011: hex = 7'b1101001;
+			4'b1100: hex = 7'b1011101;
+			4'b1101: hex = 7'b1001101;
+			4'b1110: hex = 7'b1011001;
+			4'b1111:	hex = 7'b1001001;
+			default: hex = 7'b0000000;
+		endcase
+	end
+endmodule
+
+module hexDecoder(bin,hout);
+	input [3:0]bin;
+	output reg [6:0]hout;
+
+	always@(*)
+	begin
+		case(bin)
+			4'b0000: hout = 7'b1000000;
+			4'b0001: hout = 7'b1111001;
+			4'b0010: hout = 7'b0100100;
+			4'b0011: hout = 7'b0110000;
+			4'b0100: hout = 7'b0011001;
+			4'b0101: hout = 7'b0010010;
+			4'b0110: hout = 7'b0000010;
+			4'b0111: hout = 7'b1111000;
+			4'b1000: hout = 7'b0000000;
+			4'b1001: hout = 7'b0010000;
+			4'b1010: hout = 7'b0001000;
+			4'b1011: hout = 7'b0000011;
+			4'b1100: hout = 7'b1000110;
+			4'b1101: hout = 7'b0100001;
+			4'b1110: hout = 7'b0000110;
+			4'b1111: hout = 7'b0001110;
+			default: hout = 7'b1111111;
+		endcase
+	end
+
+endmodule 

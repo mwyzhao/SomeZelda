@@ -20,6 +20,9 @@ module datapath(
 	input 			draw_link, 			//DRAW LINK SIGNAL 				FROM CONTROL
 	input 			draw_enemies, 		//DRAW ENEMY SIGNAL 			FROM CONTROL
 	
+	output  [8:0] link_x_pos,
+	output  [7:0] link_y_pos,
+	
 	output reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
 	output reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
 	output reg		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
@@ -28,14 +31,16 @@ module datapath(
 	//probably don't need the commented out signals
 	output reg		idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
 	//output 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FOR CONTROL
-	//output 		check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
+	output 			check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
 	output 		  	draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
 	output 			draw_link_done, 		//DRAW DONE SIGNAL 				FOR CONTROL
-	output 			draw_enemies_done 	//DRAW DONE SIGNAL 				FOR CONTROL
+	output 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FOR CONTROL
+	
+	output [7:0] testRom
 	);
 	
 	/** parameters **/
-	parameter 	MAX_FRAME_COUNT = 24'd1666666, 	//count for for 30 fps 50MHz/30
+	parameter 	MAX_FRAME_COUNT = 24'd1, 	//count for for 30 fps 50MHz/30
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -56,8 +61,8 @@ module datapath(
 	wire map_write;
 
 	//character signal wires
-	wire [8:0] link_x_pos;
-	wire [7:0] link_y_pos;
+//	wire [8:0] link_x_pos;
+//	wire [7:0] link_y_pos;
 	wire [8:0] link_x_draw;
 	wire [7:0] link_y_draw;
 	wire [2:0] link_direction;
@@ -78,6 +83,8 @@ module datapath(
 	wire enemy_collision;
 	wire enemy_draw_done;
 	wire enemy_write;
+	
+	wire e1_hit;
 
 	//frame counter limits actions to 50Hz
 	//21 bits for overflow safety
@@ -106,6 +113,10 @@ module datapath(
 
 		//VGA write enable
 		.VGA_write 		(map_write));
+	defparam
+		M.X_INITIAL = 5'b0,
+		M.Y_INITIAL = 5'b0;
+	
 
 	link_char p(
 		.clock 			(clock),
@@ -185,6 +196,7 @@ module datapath(
 	collision_detector cd(
 		.clock 				(clock),
 		.reset 				(reset),
+		.init 				(init),
 
 		//enable signal for calculations
 		.collision_enable 	(check_collide),
@@ -199,11 +211,16 @@ module datapath(
 		.enemy1_y 			(enemy_y_pos),
 		.direction_enemy1	(enemy_direction),
 		.facing_enemy1		(enemy_facing),
+		.attack 				(OFF),
 
 		//output collision true,false signals
 		.c_map_collision		(link_collision[0]),
 		.c_e1_collision 		(link_collision[1]),
-		.e1_map_collision 	(enemy_collision));
+		.e1_map_collision 	(enemy_collision),
+		.e1_hit					(e1_hit),
+		
+		.done 					(check_collide_done),
+		.testRom 				(testRom));
 
 	/** combinational logic **/
 	always@(*)
