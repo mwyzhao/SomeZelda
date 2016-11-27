@@ -44,7 +44,7 @@ module fibonacci_lfsr(
 	input  clk,
 	input  rst,
 	input  init,
-	input  seed,
+	input  [8:0]seed,
 	output rn
 	);
 

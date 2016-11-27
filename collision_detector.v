@@ -15,6 +15,7 @@
 module collision_detector(
 	input clock,
 	input reset,
+	input init,
 
 	//enable signal from control
 	input collision_enable,
@@ -24,7 +25,7 @@ module collision_detector(
 	input		[7:0] char_y,
 	input 		[2:0] direction_char,
 	input 		[2:0] facing_char,
-	input 		attack;
+	input 		attack,
 	//position for enemies
 	input		[8:0] enemy1_x,
 	input		[7:0] enemy1_y,
@@ -38,9 +39,10 @@ module collision_detector(
 	/* c = player character, e1 = enemy1, e2 = enemy2 */
 	output reg	c_map_collision,
 	output reg	e1_map_collision,
-	output reg	c_e1_collision
-	output reg  e1_hit;
-
+	output reg	c_e1_collision,
+	output reg  e1_hit,
+	output reg	done,
+	output reg [7:0] testRom
 	//output reg [1:0] facing_c_out;
 	//output reg [1:0] facing_e_out;
 	);
@@ -103,42 +105,44 @@ module collision_detector(
 	wire [16:0] address_e_tr;
 	wire [16:0] address_e_bl;
 	wire [16:0] address_e_br;
+	
+	reg [3:0] count;
 
-	vga_address_translator tc(.x(xin_c),
+	translate256x176 tc(.x(xin_c),
 							  .y(yin_c),
 							  .mem_address(address_c)
 							  );
 
-	vga_address_translator tctr(.x(xin_c_tr),
+	translate256x176 tctr(.x(xin_c_tr),
 							  	.y(yin_c_tr),
 							  	.mem_address(address_c_tr)
 							  	);
-	vga_address_translator tcbl(.x(xin_c_bl),
+	translate256x176 tcbl(.x(xin_c_bl),
 							  	.y(yin_c_bl),
 							  	.mem_address(address_c_bl)
 							  	);
 
-	vga_address_translator tcbr(.x(xin_c_br),
+	translate256x176 tcbr(.x(xin_c_br),
 							  	.y(yin_c_br),
 							  	.mem_address(address_c_br)
 							  	);
 
 
-	vga_address_translator te(.x(xin_e),
+	translate256x176 te(.x(xin_e),
 							  .y(yin_e),
 							  .mem_address(address_e)
 							  );
 
-	vga_address_translator tetr(.x(xin_e_tr),
+	translate256x176 tetr(.x(xin_e_tr),
 							  	.y(yin_e_tr),
 							  	.mem_address(address_e_tr)
 							  	);
-	vga_address_translator tebl(.x(xin_e_bl),
+	translate256x176 tebl(.x(xin_e_bl),
 							  	.y(yin_e_bl),
 							  	.mem_address(address_e_bl)
 							  	);
 
-	vga_address_translator tebr(.x(xin_e_br),
+	translate256x176 tebr(.x(xin_e_br),
 							  	.y(yin_e_br),
 							  	.mem_address(address_e_br)
 							  	);
@@ -355,12 +359,27 @@ module collision_detector(
 			e1_map_collision = OFF;
 			c_map_collision = OFF;
 		end
+		testRom = {col_e, col_e_tr, col_e_bl, col_e_br, col_c,col_c_tr, col_c_bl, col_c_br};
 
 	end
 	
+	always@(posedge clock)
+	begin
+		count <= count + 1'b1;
+		if(reset)
+		begin
+			count <= 4'b0;
+			done <= 1'b0;
+		end
+		else if(init)
+		begin
+			count <= 4'b0;
+			done <= 1'b0;
+		end
+		else if(count == 4'b1111)
+			done <= 1'b1;
+		else
+			done <= 1'b0;
+	end
 	
-	
-
-	
-
 endmodule

@@ -18,8 +18,8 @@ module single_enemy(
 	input 	  		collision,
 
 	//link position for tracking movement
-	input 			link_x_pos,
-	input			link_y_pos,
+	input 		[8:0] link_x_pos,
+	input			[7:0] link_y_pos,
 
 	//enemy position for collision_detector and vga
 	output reg 	[8:0] x_pos,
@@ -134,9 +134,9 @@ module single_enemy(
 					direction	<= UP;
 				else if(link_y_pos > y_pos)
 					direction <= DOWN;
-				else if(link_x_pos < y_pos)
+				else if(link_x_pos < x_pos)
 					direction <= LEFT;
-				else if(link_x_pos > y_pos)
+				else if(link_x_pos > x_pos)
 					direction <= RIGHT;
 			end
 		end
