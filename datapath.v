@@ -67,23 +67,27 @@ module datapath(
 	wire [7:0] link_y_draw;
 	wire [2:0] link_direction;
 	wire [2:0] link_facing;
-	wire [5:0] link_colour;
 	wire [1:0] link_collision;
-	wire link_draw_done;
+	wire [5:0] link_colour;
 	wire link_write;
+	wire link_draw_done;
 
 	//enemy signal wires
-	wire [8:0] enemy_x_pos;
-	wire [7:0] enemy_y_pos;
+	wire [8:0] enemy_1_x_pos;
+	wire [7:0] enemy_1_y_pos;
+	wire [8:0] enemy_2_x_pos;
+	wire [7:0] enemy_2_y_pos;
+	wire [8:0] enemy_3_x_pos;
+	wire [7:0] enemy_3_y_pos;
 	wire [8:0] enemy_x_draw;
 	wire [7:0] enemy_y_draw;
 	wire [2:0] enemy_direction;
 	wire [2:0] enemy_facing;
-	wire [5:0] enemy_colour;
 	wire enemy_collision;
-	wire enemy_draw_done;
+	wire [5:0] enemy_colour;
 	wire enemy_write;
-	
+	wire enemy_draw_done;
+
 	wire e1_hit;
 
 	//frame counter limits actions to 50Hz
@@ -152,13 +156,13 @@ module datapath(
 		//data to load into VGA
 		.colour			(link_colour),
 
-		//link output finished signal
-		.draw_done 		(draw_link_done),
-
 		//VGA write enable
-		.VGA_write 		(link_write));
+		.VGA_write 		(link_write)		
 
-	single_enemy blob_things(
+		//link output finished signal
+		.draw_done 		(draw_link_done));
+
+	enemies blob_things(
 		.clock 			(clock),
 		.reset 			(reset),
 
@@ -177,21 +181,34 @@ module datapath(
 		.link_y_pos		(link_y_pos),
 
 		//enemy position coordinates
-		.x_pos 			(enemy_x_pos),
-		.y_pos 			(enemy_y_pos),
-		.x_draw 		(enemy_x_draw),
-		.y_draw 		(enemy_y_draw),
+		.enemy_1_x_pos 			(enemy_1_x_pos),
+		.enemy_1_y_pos 			(enemy_1_y_pos),
+
+		.enemy_2_x_pos 			(enemy_2_x_pos),
+		.enemy_2_y_pos 			(enemy_2_y_pos),
+
+		.enemy_3_x_pos 			(enemy_3_x_pos),
+		.enemy_3_y_pos 			(enemy_3_y_pos),
+		
+		.x_draw 				(enemy_x_draw),
+		.y_draw 				(enemy_y_draw),
 
 		//enemy direction information
-		.direction		(enemy_direction),
-		.facing 		(enemy_facing),
+		.enemy_1_direction		(enemy_direction),
+		.enemy_1_facing 		(enemy_facing),
+
+		.enemy_2_direction		(enemy_direction),
+		.enemy_2_facing 		(enemy_facing),
+
+		.enemy_3_direction		(enemy_direction),
+		.enemy_3_facing 		(enemy_facing),
 
 		//data to load into VGA
 		.colour	 		(enemy_colour),
 
-		.draw_done 		(draw_enemies_done),
+		.VGA_write 		(enemy_write),
 
-		.VGA_write 		(enemy_write));
+		.draw_done 		(draw_enemies_done));
 	
 	collision_detector cd(
 		.clock 				(clock),

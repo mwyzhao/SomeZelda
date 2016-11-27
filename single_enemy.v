@@ -31,13 +31,14 @@ module single_enemy(
 	output reg 	[2:0] direction,
 	output reg 	[2:0] facing,
 
-	//memory output data for vga
+	//memory output data for VGA
 	output 	 	[5:0] colour,
+
+	//output write enable to VGA
+	output  				VGA_write
 
 	//output finished signals
 	output reg 			draw_done,
-	//output write enable to VGA (do we need this?)
-	output  				VGA_write
 	);
 
 	/** local parameters **/
@@ -53,14 +54,9 @@ module single_enemy(
 
 					MAX_COUNT 	= 8'd255;
 
-	/** ram for enemy character sprites which includes 8 enemy walking sprites **/
-
-	enemy_sprite_mem m0(
-		.address({spriteAddressY,spriteAddressX}),
-		.clock(clock),
-		.q(colour));
+	/** sprite memory moved to wrapper module enemies.v **/
+	
 	/** random number generator for movement **/
-
 	random_number_generator enemy_move(
 		.clock(clock),
 		.reset(reset),
