@@ -52,25 +52,30 @@ module link_char(
 					ON				= 1'b1,
 					OFF			= 1'b0,
 
-					MAX_COUNT	= 8'd255;
+					MAX_COUNT	= 8'd255,
+					MAX_ATK_COUNT = 9'd511;
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
-
+	translateLinkSprite64x48(.x(spriteAddressX),
+							 .y(spriteAddressY),
+							 .mem_address(spriteMemAddress)
+							 );
 	link_sprite_mem m0(
-		.address({spriteAddressY,spriteAddressX}),
+		.address(spriteMemAddress),
 		.clock(clock),
 		.q(colour));
 
 	/** registers and wires **/
 	reg [5:0] spriteAddressX;
 	reg [3:0] spriteAddressY;
-	reg [5:0] intAddress;
-
+	reg [5:0] intAddressX;
+	reg [5:0] intAddressY
+	wire [11:0]spriteMemAddress;
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
-
+	reg 	[8:0] atkCount;
 	assign VGA_write = (draw) && (colour != 6'b111111);
 
 	//sequential logic
@@ -83,7 +88,8 @@ module link_char(
 			y_draw <= 8'b0;
 			x_pos 	<= 9'd1;
 			y_pos 	<= 8'd96;
-			count 	 	<= 6'b0;
+			count 	 	<= 8'b0;
+			atkCount <= 9'b0;
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
@@ -95,7 +101,8 @@ module link_char(
 			y_draw <= 8'b0;
 			x_pos	<= 9'd1;
 			y_pos	<= 8'd96;
-			count  		<= 6'b0;
+			count  		<= 8'b0;
+			atkCount <= 9'b0;
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
@@ -119,12 +126,28 @@ module link_char(
 
 		else if(apply_action)
 		begin
-			/*
+			
 			else if(direction == ATTACK)
 			begin
-				//pull from attack sprites
+				if(facing == UP)begin
+					intAddressX <=48;
+					intAddressY <=16;
+				end
+				else if(facing == DOWN)begin
+					intAddressX <=0;
+					intAddressY <=16;
+				end
+				else if(facing == LEFT)begin
+					intAddressX <=16;
+					intAddressY <=16;
+				end
+				else if(facing == RIGHT)begin
+					intAddressX <=16;
+					intAddressY <=32;
+				end
+
 			end
-			*/
+			
 			if(direction == UP)
 			begin
 				//pull from move up sprites
@@ -133,7 +156,8 @@ module link_char(
 					y_pos 	<= y_pos - 1'b1;
 				end
 				facing <= UP;
-				intAddress <= 32;
+				intAddressX <= 32;
+				intAddressY <= 0;
 			end
 			else if(direction == DOWN)
 			begin
@@ -143,7 +167,8 @@ module link_char(
 					y_pos 	<= y_pos + 1'b1;
 				end
 				facing	<= DOWN;
-				intAddress <= 0;
+				intAddressX <= 0;
+				intAddressY <= 0;
 			end
 			else if(direction == LEFT)
 			begin
@@ -153,7 +178,8 @@ module link_char(
 					x_pos	<= x_pos - 1'b1;
 				end
 				facing <= LEFT;
-				intAddress <= 16;
+				intAddressX <= 16;
+				intAddressY <= 0;
 			end
 			else if(direction == RIGHT)
 			begin
@@ -163,17 +189,17 @@ module link_char(
 					x_pos	<= x_pos + 1'b1;
 				end
 				facing <= RIGHT;
-				intAddress <= 48;
+				intAddressX <= 48;
+				intAddressY <= 0;
 			end
 		end
 
-		else if(draw
-)
+		else if(draw && (direction != ATTACK))
 		begin
 			//do not need to implement erase if redrawing entire map
 			//set write enable to on
-			spriteAddressX <= intAddress + count[3:0];
-			spriteAddressY <= count[7:4];
+			spriteAddressX <= intAddressX + count[3:0];
+			spriteAddressY <= intAddressY + count[7:4];
 			//increment x and y positions
 			x_draw <= x_pos + count[3:0];
 			y_draw <= y_pos + count[7:4];
@@ -185,6 +211,58 @@ module link_char(
 			begin
 				//set write enable to off and reset counter
 				count 		<= 8'b0;
+
+				//send out draw done signal to move to next state
+				draw_done 	<= ON;
+			end
+		end
+		else if(draw && (direction == ATTACK))
+		begin
+			//do not need to implement erase if redrawing entire map
+			//set write enable to on
+			//spriteAddressX <= intAddressX + atkCount[3:0];
+			//spriteAddressY <= intAddressY + atkCount[7:4];
+			//increment x and y positions
+			//x_draw <= x_pos + atkCount[3:0];
+			//y_draw <= y_pos + atkCount[7:4];
+
+			if(facing == DOWN)begin
+				spriteAddressX <= intAddressX + atkCount[3:0];
+				spriteAddressY <= intAddressY + atkCount[8:4];
+				//increment x and y positions
+				x_draw <= x_pos + atkCount[3:0];
+				y_draw <= y_pos + atkCount[8:4];
+			end
+			else if(facing == UP)begin
+				spriteAddressX <= intAddressX + atkCount[3:0];
+				spriteAddressY <= intAddressY + atkCount[8:4];
+				//increment x and y positions
+				x_draw <= x_pos + atkCount[3:0];
+				y_draw <= y_pos - 16 + atkCount[8:4];
+			end
+			else if (facing == LEFT) begin
+				spriteAddressX <= intAddressX + atkCount[4:0];
+				spriteAddressY <= intAddressY + atkCount[8:5];
+				//increment x and y positions
+				x_draw <= x_pos -16 + atkCount[4:0];
+				y_draw <= y_pos + atkCount[8:5];
+			end
+			else if (facing == RIGHT) begin
+				spriteAddressX <= intAddressX + atkCount[4:0];
+				spriteAddressY <= intAddressY + atkCount[8:5];
+				//increment x and y positions
+				x_draw <= x_pos + atkCount[4:0];
+				y_draw <= y_pos + atkCount[8:5];
+			end
+
+			//increment counter
+			atkCount 		<= atkCount + 1'b1;
+
+			//once counter reaches max, drawing done
+			if(count == MAX_ATK_COUNT)
+			begin
+				//set write enable to off and reset counter
+				atkCount 		<= 9'b0;
 
 				//send out draw done signal to move to next state
 				draw_done 	<= ON;
