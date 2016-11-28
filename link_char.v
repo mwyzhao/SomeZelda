@@ -35,10 +35,10 @@ module link_char(
 	output 	 	[5:0] colour,
 
 	//output write enable to VGA
-	output  			VGA_write	
+	output  			VGA_write,
 
 	//output finished signals
-	output reg 			draw_done,
+	output reg 			draw_done
 	);
 
 	/** local parameters **/

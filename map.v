@@ -20,33 +20,31 @@ module map(
 	output 		  [5:0]	colour,
 
 	//output finished signal
-	output reg			draw_done,
+	output reg		draw_done,
 
 	//output write enable to VGA
 	output  			VGA_write
 	);
 
 	/** parameters **/
-	parameter 		X_INITIAL	= 5'd31,
+	parameter 	X_INITIAL	= 5'd31,
 					Y_INITIAL	= 5'd31,
 					MAX_X 		= 8'd255,			//255
 					MAX_COUNT 	= 16'd45055, 		//number of pixels in 256x176 (map size)
 					ON 			= 1'b1,
 					OFF 		= 1'b0;
 
-	wire [16:0] address;
-
 	/** memory modules **/
 	map_mem map1(
 		.address		(count),
-		.clock 			(clock),
+		.clock 		(clock),
 		.q				(colour));
 
 	/* maybe one day
 	map_mem map2(
-		.address 		(count),
-		.clock 			(clock),
-		.q 				(colour));
+		.address 	(count),
+		.clock 		(clock),
+		.q 			(colour));
 	*/
 
 	/** register declaractions **/

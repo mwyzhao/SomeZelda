@@ -8,14 +8,14 @@ module single_enemy(
 	input reset,
 
 	//state signals from control
-	input 			init,
-	input 			idle,
-	input 			gen_move,
-	input 			apply_move,
-	input 			draw,
+	input 		init,
+	input 		idle,
+	input 		gen_move,
+	input 		apply_move,
+	input 		draw,
 
 	//collision signal from collision_detector
-	input 	  		collision,
+	input 	  	collision,
 
 	//link position for tracking movement
 	input 		[8:0] link_x_pos,
@@ -32,17 +32,19 @@ module single_enemy(
 	output reg 	[2:0] facing,
 
 	//memory output data for VGA
-	output 	 	[5:0] colour,
+	output 		[5:0] colour,
 
 	//output write enable to VGA
-	output  				VGA_write
+	output  		VGA_write,
 
 	//output finished signals
-	output reg 			draw_done,
+	output reg 	draw_done
 	);
 
 	/** local parameters **/
-	parameter 	NO_ACTION 	= 3'b000,
+	parameter 	X_INITIAL	= 8'd207,
+					Y_INITIAL	= 8'd95,
+					NO_ACTION 	= 3'b000,
 					ATTACK 		= 3'b001,
 					UP 			= 3'b010,
 					DOWN 			= 3'b011,
@@ -53,8 +55,15 @@ module single_enemy(
 					OFF		 	= 1'b0,
 
 					MAX_COUNT 	= 8'd255;
+	/* NOTE: MUST DEFINE CUSTOM INITIAL POSITION USING DEFPARAM 
+	 * Default value x = 207, y = 95
+	 */
 
-	/** sprite memory moved to wrapper module enemies.v **/
+	/** ram for enemy character sprites which includes 8 enemy walking sprites **/
+	enemy_sprite_mem enemy_sprite(
+		.address	({spriteAddressY,spriteAddressX}),
+		.clock	(clock),
+		.q			(colour));
 	
 	/** random number generator for movement **/
 	random_number_generator enemy_move(
@@ -75,8 +84,14 @@ module single_enemy(
 	reg [5:0] intAddress;
 	/** position registers for enemies**/
 
-	//counter for when link is finished drawing
+	//counter for when enemy is finished drawing
 	reg 	[7:0] count;
+
+	//counter for gridlocking enemy to 16 pixel wide movements
+	reg	[3:0] move_count;
+
+	//enemy status register
+	reg	ded;
 
 	//do not draw white sprite background colours
 	assign VGA_write = (draw) && (colour != 6'b111111);
@@ -89,27 +104,31 @@ module single_enemy(
 			//reset block, resets all registers to 0;
 			x_draw		<= 9'b0;
 			y_draw		<= 8'b0;
-			x_pos		<= 9'd210;
-			y_pos		<= 8'd96;
-			count				<= 6'b0;
+			x_pos			<= X_INITIAL;
+			y_pos			<= Y_INITIAL;
+			count			<= 6'b0;
+			move_count	<= 4'b0;
 			facing		<= DOWN;
-			draw_done		<= OFF;
+			draw_done	<= OFF;
 		end
 		else if(init)
 		begin
 			//initialize first time character appears on map
 			x_draw		<= 8'b0;
 			y_draw		<= 8'b0;
-			x_pos		<= 9'd210;
-			y_pos		<= 8'd96;
-			count				<= 6'b0;
+			x_pos			<= X_INITIAL;
+			y_pos			<= Y_INITIAL;
+			count			<= 6'b0;
+			move_count	<= 4'b0;
 			facing		<= DOWN;
-			draw_done		<= OFF;
+			draw_done	<= OFF;
 		end
 		
-		else if(gen_move)
+		//will take in new move every 16 cycles
+		//move_count can be incremented in any state that runs every cycle
+		//will incrememnt move_count in apply_move
+		else if(gen_move & (move_count != 4'b1111))
 		begin
-			/* will add more sophisticated enemies later */
 			//this is for some added unpredictability in enemy movements
 			//only triggers when random numbers match 11, EV 1/8
 			if(move_interrupt[1:0] == 2'b11)
@@ -127,7 +146,7 @@ module single_enemy(
 			else
 			begin
 				if(link_y_pos < y_pos)
-					direction	<= UP;
+					direction <= UP;
 				else if(link_y_pos > y_pos)
 					direction <= DOWN;
 				else if(link_x_pos < x_pos)
@@ -139,71 +158,76 @@ module single_enemy(
 
 		else if(apply_move)
 		begin
+			//increment move_count here
+			move_count <= move_count + 1'b1;
+
 			if(direction == UP)
 			begin
 				//pull from move up sprites
 				if(!collision)
 				begin
-					y_pos <= y_pos - 1'b1;
+					y_pos 	<= y_pos - 1'b1;
 				end
-				facing	<= UP;
-				intAddress		<= 6'd32;
+				facing		<= UP;
+				intAddress	<= 6'd32;
 			end
 			else if(direction == DOWN)
 			begin
 				//pull from move down sprites
 				if(!collision)
 				begin
-					y_pos	<= y_pos + 1'b1;
+					y_pos		<= y_pos + 1'b1;
 				end
-				facing	<= DOWN;
-				intAddress		<= 6'd0;
+				facing		<= DOWN;
+				intAddress	<= 6'd0;
 			end
 			else if(direction == LEFT)
 			begin
 				//pull from move left sprites
 				if(!collision)
 				begin
-					x_pos	<= x_pos - 1'b1;
+					x_pos		<= x_pos - 1'b1;
 				end
-				facing	<= LEFT;
-				intAddress		<= 6'd16;
+				facing		<= LEFT;
+				intAddress	<= 6'd16;
 			end
 			else if(direction == RIGHT)
 			begin
 				//pull from move right sprites
 				if(!collision)
 				begin
-					x_pos	<= x_pos + 1'b1;
+					x_pos		<= x_pos + 1'b1;
 				end
-				facing 	<= RIGHT;
-				intAddress	 	<= 6'd48;
+				facing 		<= RIGHT;
+				intAddress	<= 6'd48;
 			end
 		end
 
 		else if(draw)
 		begin
+
+
 			spriteAddressX <= intAddress + count[3:0];
 			spriteAddressY <= count[7:4];
 			//increment x and y positions
 			x_draw <= x_pos + count[3:0];
 			y_draw <= y_pos + count[7:4];
 			//increment counter
-			count 		<= count + 1'b1;
+			count <= count + 1'b1;
 
 			//once counter reaches max, drawing done
 			if(count == MAX_COUNT)
 			begin
 				//set write enable to off and reset counter
-				count 		<= 8'b0;
+				count <= 8'b0;
 
 				//send out draw done signal to move to next state
-				draw_done 	<= ON;
+				draw_done <= ON;
 			end
 		end
 		else
 		begin
-			draw_done <=OFF;
+			draw_done <= OFF;
 		end
 	end
 

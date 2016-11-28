@@ -5,10 +5,10 @@ module random_number_generator(
 	output [3:0] out
 	);
 
-	parameter	SEED0 = 8'b10010110,
-				SEED1 = 8'b01000001,
-				SEED2 = 8'b00010110,
-				SEED3 = 8'b10111001;
+	parameter	SEED0 = 9'b010010110,
+				SEED1 = 9'b001000001,
+				SEED2 = 9'b000010110,
+				SEED3 = 9'b010111001;
 
 	fibonacci_lfsr rng0(
 		.clk	(clock),
