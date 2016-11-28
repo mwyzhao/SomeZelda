@@ -175,15 +175,7 @@ module enemies(
 	/** combinational logic **/
 	always@(*)
 	begin
-		if(reset)
-		begin
-			x_draw = 9'b0;
-			y_draw = 8'b0;
-			draw_1 = OFF;
-			draw_2 = OFF;
-			draw_3 = OFF;
-		end
-		else if(draw)
+		if(draw)
 		begin
 			//start drawing enemy 1 when draw signal is on
 			draw_1 = ON;
@@ -198,6 +190,7 @@ module enemies(
 
 			//after enemy 1 is done start drawing draw enemy 2
 			if(draw_done_1)
+			begin
 				draw_2 = ON;
 				//connect colour and VGA_write to enemy 2 while drawing
 				if(!draw_done_2)
@@ -207,9 +200,11 @@ module enemies(
 					colour = colour_2;
 					VGA_write = VGA_write_2;
 				end
+			end
 
 			//after enemy 2 is done start drawing draw enemy 3
 			if(draw_done_2)
+			begin
 				draw_3 = ON;
 				//connect colour and VGA_write to enemy 3 while drawing
 				if(!draw_done_3)
@@ -219,6 +214,7 @@ module enemies(
 					colour = colour_3;
 					VGA_write = VGA_write_3;
 				end
+			end
 
 			//done drawing all, set draw_done to on
 			if(draw_done_3)
@@ -226,9 +222,16 @@ module enemies(
 		end
 
 		else
+		begin
 			x_draw = 9'b0;
 			y_draw = 8'b0;
+			colour = 6'b0;
+			draw_1 = OFF;
+			draw_2 = OFF;
+			draw_3 = OFF;
+			VGA_write = OFF;
 			draw_done = OFF;
+		end
 	end
 
 
