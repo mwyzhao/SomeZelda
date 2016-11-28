@@ -65,9 +65,6 @@ module zelda_game
 	wire 		[8:0] x;
 	wire 		[7:0] y;
 	wire 		writeEn;
-	
-	assign LEDR[9] = writeEn;
-	assign LEDR[8] = draw_enemies_done;
 
 	// Create an Instance of a VGA controller - there can be only one!
 	// Define the number of colours as well as the initial background
@@ -104,10 +101,19 @@ module zelda_game
 	wire idle_done, gen_move_done, check_collide_done, draw_map_done;
 	wire draw_link_done, draw_enemies_done, draw_vga_done;
 	
-	//delete these late
-	wire [7:0] enemy_1_x_pos;
-	wire [7:0] enemy_2_x_pos;
-	wire [7:0] enemy_3_x_pos;
+	wire [2:0] link_hp;
+
+	hexDecoder hp0(
+		.bin({1'b0,link_hp}),
+		.hout(HEX2));
+	
+	hexDecoder hp1(
+		.bin(4'b0),
+		.hout(HEX3));
+
+	// hexDecoder e1x2(
+	// 	.bin(enemy_3_x_pos[3:0]),
+	// 	.hout(HEX4));
 
 	control C(
 		//inputs
@@ -136,38 +142,6 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
 		.draw_to_vga		(draw_to_vga));
-	
-	hexDecoder e1x1(
-		.bin(enemy_3_x_pos[7:4]),
-		.hout(HEX5));
-	
-	hexDecoder e1x2(
-		.bin(enemy_3_x_pos[3:0]),
-		.hout(HEX4));
-	
-	hexDecoder e2x1(
-		.bin(enemy_2_x_pos[7:4]),
-		.hout(HEX3));
-		
-	hexDecoder e2x2(
-		.bin(enemy_2_x_pos[3:0]),
-		.hout(HEX2));
-		
-	hexDecoder e3x1(
-		.bin(enemy_1_x_pos[7:4]),
-		.hout(HEX1));
-		
-	hexDecoder e3x2(
-		.bin(enemy_1_x_pos[3:0]),
-		.hout(HEX0));
-	
-	// hex_decoder h1(
-	// 	.data(enemy_c),
-	// 	.hex(HEX1));
-		
-	// hex_decoder h0(
-	// 	.data(link_c),
-	// 	.hex(HEX0));
 		
 	datapath D(
 		//inputs
@@ -190,15 +164,9 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
 		.draw_to_vga 		(draw_to_vga),
-
-		.enemy_1_x_pos(enemy_1_x_pos),
-		.enemy_1_y_pos(enemy_1_y_pos),
-		.enemy_2_x_pos(enemy_2_x_pos),
-		.enemy_2_y_pos(enemy_2_y_pos),
-		.enemy_3_x_pos(enemy_3_x_pos),
-		.enemy_3_y_pos(enemy_3_y_pos),
 		
 		//outputs
+		.link_hp			(link_hp)
 		.x_position			(x),
 		.y_position			(y),
 		.colour 			(colour),
@@ -211,7 +179,6 @@ module zelda_game
 		.draw_link_done	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
 		.draw_vga_done	(draw_vga_done),
-		.c_e_test(LEDR[7:4])
 		);
 		
 		//remember to remove later
