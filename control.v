@@ -11,6 +11,7 @@ module control(
 	input			draw_map_done,		//DRAW DONE SIGNAL				FROM DATAPATH
 	input 			draw_link_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
+	input				draw_vga_done,
 
 	output 	[3:0] states,
 	
@@ -22,7 +23,8 @@ module control(
 	output reg 		move_enemies, 		//APPLY ENEMY MOVEMENT 			FOR DATAPATH
 	output reg 		draw_map,			//DRAW MAP SIGNAL				FOR DATAPATH
 	output reg 		draw_link, 			//DRAW LINK SIGNAL 				FOR DATAPATH
-	output reg 		draw_enemies 		//DRAW ENEMY SIGNAL 			FOR DATAPATH
+	output reg 		draw_enemies, 		//DRAW ENEMY SIGNAL 			FOR DATAPATH
+	output reg		draw_to_vga
 	);
 
 	//State list and parameters
@@ -35,7 +37,7 @@ module control(
 					S_DRAW_MAP			= 4'b0110, 		//DRAW MAP
 					S_DRAW_LINK 		= 4'b0111, 		//DRAW USER CHARACTER
 					S_DRAW_ENEMIES 		= 4'b1000, 		//DRAW ENEMIES
-					S_TEST 				= 4'b1001,
+					S_DRAW_TO_VGA		= 4'b1001,
 					ON 					= 1'b1,
 					OFF 				= 1'b0;
 
@@ -55,8 +57,8 @@ module control(
 			S_MOVE_ENEMIES: 		next_state = S_DRAW_MAP;
 			S_DRAW_MAP:				next_state = draw_map_done ? S_DRAW_LINK : S_DRAW_MAP;
 			S_DRAW_LINK: 			next_state = draw_link_done ? S_DRAW_ENEMIES : S_DRAW_LINK;
-			S_DRAW_ENEMIES:			next_state = draw_enemies_done ? S_IDLE : S_DRAW_ENEMIES;
-			S_TEST: 					next_state = S_TEST;
+			S_DRAW_ENEMIES:			next_state = draw_enemies_done ? S_DRAW_TO_VGA : S_DRAW_ENEMIES;
+			S_DRAW_TO_VGA:			next_state = draw_vga_done ? S_IDLE : S_DRAW_TO_VGA;
 			default:				next_state = S_IDLE;
 		endcase
 	end
@@ -74,6 +76,7 @@ module control(
 		draw_map 		= OFF;
 		draw_link		= OFF;
 		draw_enemies 	= OFF;
+		draw_to_vga		= OFF;
 
 		case(current_state)
 			S_INIT:
@@ -94,6 +97,8 @@ module control(
 				draw_link 		= ON;
 			S_DRAW_ENEMIES:
 				draw_enemies 	= ON;
+			S_DRAW_TO_VGA:
+				draw_to_vga = ON;
 		endcase
 	end
 

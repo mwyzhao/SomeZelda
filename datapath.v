@@ -19,7 +19,8 @@ module datapath(
 	input			draw_map,			//DRAW MAP SIGNAL				FROM CONTROL 
 	input 			draw_link, 			//DRAW LINK SIGNAL 				FROM CONTROL
 	input 			draw_enemies, 		//DRAW ENEMY SIGNAL 			FROM CONTROL
-	
+	input 			draw_to_vga,
+
 	output [8:0] enemy_1_x_pos,
 	output [7:0] enemy_1_y_pos,
 	output [8:0] enemy_2_x_pos,
@@ -27,9 +28,11 @@ module datapath(
 	output [8:0] enemy_3_x_pos,
 	output [7:0] enemy_3_y_pos,
 	
+	output [3:0] c_e_test,
+	
 	output reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
 	output reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
-	output reg		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
+	output		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
 	output reg		VGA_enable,			//WRITE ENABLE SIGNAL 			FOR VGA
 
 	//probably don't need the commented out signals
@@ -38,13 +41,15 @@ module datapath(
 	output 			check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
 	output 		  	draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
 	output 			draw_link_done, 		//DRAW DONE SIGNAL 				FOR CONTROL
-	output 			draw_enemies_done 	//DRAW DONE SIGNAL 				FOR CONTROL
-	
-	//output [7:0] testRom
+	output 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FOR CONTROL
+	output reg 		draw_vga_done
 	);
 	
 	/** parameters **/
 	parameter 	MAX_FRAME_COUNT = 28'd1, 	//count for for 30 fps 50MHz/30
+				COUNT_INITIAL = 16'd65535,
+				MAX_COUNT = 16'd45055,
+				MAX_X_POSITION = 8'd255,
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -73,7 +78,7 @@ module datapath(
 	wire [3:0] link_collision;
 	wire [5:0] link_colour;
 	wire link_write;
-
+	assign c_e_test = {e3_hit,e2_hit,e1_hit,1'b0};
 	//enemy signal wires
 //	wire [8:0] enemy_1_x_pos;
 //	wire [7:0] enemy_1_y_pos;
@@ -93,14 +98,37 @@ module datapath(
 	wire enemy2_collision;
 	wire enemy3_collision;
 	wire [2:0] enemy_collision;
+	wire e1_hit;
+	wire e2_hit;
+	wire e3_hit;
+	wire [2:0] e_hit;
 	wire [5:0] enemy_colour;
 	wire enemy_write;
 
 	assign enemy_collision = {enemy3_collision,enemy2_collision,enemy1_collision};
+	assign e_hit = {e3_hit,e2_hit,e1_hit};
 
 	//frame counter limits actions to 50Hz
 	//24	bits for overflow safety
 	reg  [27:0] frame_counter;
+
+	reg [5:0] fb_colour;	
+	wire [15:0] fb_address;
+	reg fb_wren;
+
+	reg [15:0] buffer_count;
+
+	translate256x176 fb_translator(
+		.x 			(x_position),
+		.y 			(y_position),
+		.mem_address (fb_address));
+	
+	frame_buffer frame_buff(
+		.address		(fb_address),
+		.clock			(clock),
+		.data 			(fb_colour),
+		.wren			(fb_wren),
+		.q				(colour));
 
 	/** module declarations go here **/
 	map M(
@@ -180,6 +208,7 @@ module datapath(
 
 		//collision signal
 		.collision 		(enemy_collision),
+		.hit 			(e_hit),
 
 		//link position coordinates for movement
 		.link_x_pos		(link_x_pos),
@@ -225,7 +254,7 @@ module datapath(
 		.char_y	 				(link_y_pos),
 		.direction_char		(link_direction),
 		.facing_char			(link_facing),
-		.attack 					((link_direction == ATTACK)),
+		.attack 					(c_attack),
 
 		.enemy1_x 				(enemy_1_x_pos),
 		.enemy1_y 				(enemy_1_y_pos),
@@ -256,76 +285,118 @@ module datapath(
 		
 		.done 					(check_collide_done));
 
-	/** combinational logic **/
-	always@(*)
-	begin
-		/* this combinational always block multiplexes the correct
-		   outputs to the VGA for the draw states defined in control */
-		if(reset)
-		begin
-			x_position 		<= 9'b0;
-			y_position 		<= 8'b0;
-			colour 			<= 6'b0;
-			VGA_enable 		<= OFF;
-		end
-			
-		//draw map state
-		else if((draw_map) && (!draw_map_done))
-		begin
-			x_position 	= map_x_draw;
-			y_position 	= map_y_draw;
-			colour 		= map_colour;
-			VGA_enable 	= map_write;
-		end
-
-		//draw link state
-		else if((draw_link) && (!draw_link_done))
-		begin
-			x_position 	= link_x_draw;
-			y_position 	= link_y_draw;
-			colour 		= link_colour;
-			VGA_enable 	= link_write;
-		end
-
-		//draw enemies state
-		else if((draw_enemies) && (!draw_enemies_done))
-		begin
-			x_position 	= enemy_x_draw;
-			y_position 	= enemy_y_draw;
-			colour 		= enemy_colour;
-			VGA_enable 	= enemy_write;			
-		end
-
-		//default
-		else
-		begin
-			x_position 	= 9'b0;
-			y_position 	= 8'b0;
-			colour 		= 6'b0;
-			VGA_enable 	= OFF;
-		end
-	end
-
 	//sequential logic :'(
 	always@(posedge clock)
 	begin
 		//synchronous reset
 		if(reset)
 		begin
+			fb_wren			<= OFF;
 			idle_done 		<= OFF;
 			frame_counter 	<= 28'b0;
+			buffer_count	<= COUNT_INITIAL;
+			x_position		<= 9'b0;
+			y_position 		<= 8'b0;
+			fb_colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+			draw_vga_done	<= OFF;
 		end
 
 		//initialize registers
 		else if(init)
 		begin
+			fb_wren			<= OFF;
 			idle_done 		<= OFF;
 			frame_counter 	<= 28'b0;
+			buffer_count	<= COUNT_INITIAL;
+			x_position		<= 9'b0;
+			y_position 		<= 8'b0;
+			fb_colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+			draw_vga_done	<= OFF;
+		end
+
+		else if((draw_map) && (!draw_map_done))
+		begin
+			VGA_enable 	<= OFF;
+			x_position 	<= map_x_draw;
+			y_position 	<= map_y_draw;
+			fb_colour 		<= map_colour;
+			fb_wren 	<= map_write;
+		end
+
+		//draw link state
+		else if((draw_link) && (!draw_link_done))
+		begin
+			VGA_enable 	<= OFF;
+			x_position 	<= link_x_draw;
+			y_position 	<= link_y_draw;
+			fb_colour 		<= link_colour;
+			fb_wren 	<= link_write;
+		end
+
+		//draw enemies state
+		else if((draw_enemies) && (!draw_enemies_done))
+		begin
+			VGA_enable 	<= OFF;
+			x_position 	<= enemy_x_draw;
+			y_position 	<= enemy_y_draw;
+			fb_colour 		<= enemy_colour;
+			fb_wren 	<= enemy_write;			
+		end
+
+		else if(draw_to_vga) 
+		begin
+			if(buffer_count == COUNT_INITIAL)
+			begin
+				buffer_count 	<= 16'b0;
+				x_position		<= 9'b0;
+				y_position 		<= 8'b0;
+				VGA_enable 		<= OFF;
+				draw_vga_done	<= OFF;
+			end
+
+			else if(buffer_count == MAX_COUNT)
+			begin
+				buffer_count 	<= COUNT_INITIAL;
+				x_position		<= 9'b0;
+				y_position 		<= 8'b0;
+				VGA_enable 		<= OFF;
+				draw_vga_done	<= ON;
+			end
+
+			//buffer_count is a number from 0 to MAX_COUNT
+			else 
+			begin
+				//turn on VGA_ENABLE and set colour to fb_colour
+				VGA_enable <= ON;
+				//increment buffer count
+				buffer_count <= buffer_count +1'b1;
+				if(x_position == MAX_X_POSITION)
+				begin
+					x_position <= 9'b0;
+					y_position <= y_position + 1'b1;
+				end
+				else
+				begin
+					x_position <= x_position + 1'b1;	
+				end
+			end
 		end
 
 		//once idle state is reached, 
-		if(idle)
+		else if(idle)
 		begin
+			//reset registers in idle for next cycle
+			fb_wren			<= OFF;
+			buffer_count	<= COUNT_INITIAL;
+			x_position		<= 9'b0;
+			y_position 		<= 8'b0;
+			fb_colour 			<= 6'b0;
+			VGA_enable 		<= OFF;
+			draw_vga_done	<= OFF;
+			VGA_enable <= OFF;
+			
 			//the '>' is safety in case draw takes too much time
 			if(frame_counter > MAX_FRAME_COUNT)
 			begin
@@ -337,6 +408,7 @@ module datapath(
 		else
 		begin
 			idle_done 		<= OFF;
+
 		end
 
 		//always increment counter

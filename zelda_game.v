@@ -99,8 +99,10 @@ module zelda_game
 	wire init, idle, gen_move, check_collide;
 	wire apply_act_link, move_enemies;
 	wire draw_map, draw_link, draw_enemies;
+	wire draw_to_vga;
 	
-	wire idle_done, gen_move_done, check_collide_done, draw_map_done, draw_link_done, draw_enemies_done;
+	wire idle_done, gen_move_done, check_collide_done, draw_map_done;
+	wire draw_link_done, draw_enemies_done, draw_vga_done;
 	
 	//delete these late
 	wire [7:0] enemy_1_x_pos;
@@ -119,7 +121,8 @@ module zelda_game
 		.draw_map_done		(draw_map_done),
 		.draw_link_done 	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
-		
+		.draw_vga_done		(draw_vga_done),
+
 		//outputs
 		.states 				(LEDR[3:0]),
 		
@@ -131,7 +134,8 @@ module zelda_game
 		.move_enemies		(move_enemies),
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
-		.draw_enemies		(draw_enemies));
+		.draw_enemies		(draw_enemies),
+		.draw_to_vga		(draw_to_vga));
 	
 	hexDecoder e1x1(
 		.bin(enemy_3_x_pos[7:4]),
@@ -185,6 +189,7 @@ module zelda_game
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
+		.draw_to_vga 		(draw_to_vga),
 
 		.enemy_1_x_pos(enemy_1_x_pos),
 		.enemy_1_y_pos(enemy_1_y_pos),
@@ -196,7 +201,7 @@ module zelda_game
 		//outputs
 		.x_position			(x),
 		.y_position			(y),
-		.colour 				(colour),
+		.colour 			(colour),
 		.VGA_enable 		(writeEn),
 
 		.idle_done			(idle_done),
@@ -204,7 +209,10 @@ module zelda_game
 		.check_collide_done(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done	(draw_link_done),
-		.draw_enemies_done(draw_enemies_done));
+		.draw_enemies_done(draw_enemies_done),
+		.draw_vga_done	(draw_vga_done),
+		.c_e_test(LEDR[7:4])
+		);
 		
 		//remember to remove later
 	//	.testRom				({enemy_c,link_c}));

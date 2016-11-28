@@ -104,6 +104,9 @@ module map(
 		begin
 			//reset to prepare for next draw cycle
 			draw_done <= OFF;
+			x_pos <= X_INITIAL;
+			y_pos <= Y_INITIAL;
+			count <= 16'b0;
 		end
 	end
 

@@ -36,9 +36,10 @@ module link_char(
 
 	//output write enable to VGA
 	output  			VGA_write,
-
 	//output finished signals
-	output reg 			draw_done
+	output reg 			draw_done,
+	
+	output reg [2:0]hp
 	);
 
 	/** local parameters **/
@@ -73,6 +74,8 @@ module link_char(
 	reg [5:0] intAddressX;
 	reg [5:0] intAddressY;
 	wire [11:0]spriteMemAddress;
+	
+	reg [3:0] invincible;
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
@@ -87,6 +90,10 @@ module link_char(
 	//sequential logic
 	always@(posedge clock)
 	begin
+		if(collision[3:1] != 3'b000 && invincible==0)begin
+			hp <= hp -1;
+			invincible <= 4'b1111;
+		end
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
@@ -100,6 +107,8 @@ module link_char(
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
+			hp <= 3'b110;
+			invincible <= 4'b0000;
 		end
 		else if(init)
 		begin
@@ -114,6 +123,8 @@ module link_char(
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
+			hp <= 3'b110;
+			invincible <= 4'b0000;
 		end
 		
 		else if(reg_action)
@@ -139,6 +150,9 @@ module link_char(
 			
 			if(apply_count == 4'b0000)
 			begin
+				if(invincible!=0)
+					invincible <= invincible - 1'b1;
+
 				if(direction == ATTACK)
 				begin
 					if(facing == UP)begin
@@ -159,7 +173,7 @@ module link_char(
 					end
 
 				end
-				else begin
+				else if (invincible == 0)begin
 					if (facing == UP) begin
 						intAddressX <= 32;
 						intAddressY <= 0;
@@ -178,6 +192,24 @@ module link_char(
 					end
 					
 				end
+				else begin
+					if (facing == UP) begin
+						intAddressX <= 32;
+						intAddressY <= 48;
+					end
+					else if (facing == DOWN) begin
+						intAddressX <= 0;
+						intAddressY <= 48;
+					end
+					else if (facing == LEFT) begin
+						intAddressX <= 16;
+						intAddressY <= 48;
+					end
+					else if (facing == RIGHT) begin
+						intAddressX <= 48;
+						intAddressY <= 48;
+					end
+				end
 				
 				if(direction == UP)
 				begin
@@ -187,8 +219,15 @@ module link_char(
 						y_pos 	<= y_pos - 1'b1;
 					end
 					facing <= UP;
-					intAddressX <= 32;
-					intAddressY <= 0;
+					if(invincible == 0)begin
+						intAddressX <= 32;
+						intAddressY <= 0;
+					end
+					else begin
+						intAddressX <= 32;
+						intAddressY <= 48;
+					end
+					
 				end
 				else if(direction == DOWN)
 				begin
@@ -198,8 +237,14 @@ module link_char(
 						y_pos 	<= y_pos + 1'b1;
 					end
 					facing	<= DOWN;
-					intAddressX <= 0;
-					intAddressY <= 0;
+					if(invincible == 0)begin
+						intAddressX <= 0;
+						intAddressY <= 0;
+					end
+					else begin
+						intAddressX <= 0;
+						intAddressY <= 48;
+					end
 				end
 				else if(direction == LEFT)
 				begin
@@ -209,8 +254,14 @@ module link_char(
 						x_pos	<= x_pos - 1'b1;
 					end
 					facing <= LEFT;
-					intAddressX <= 16;
-					intAddressY <= 0;
+					if(invincible == 0)begin
+						intAddressX <= 16;
+						intAddressY <= 0;
+					end
+					else begin
+						intAddressX <= 16;
+						intAddressY <= 48;
+					end
 				end
 				else if(direction == RIGHT)
 				begin
@@ -220,9 +271,17 @@ module link_char(
 						x_pos	<= x_pos + 1'b1;
 					end
 					facing <= RIGHT;
-					intAddressX <= 48;
-					intAddressY <= 0;
+					if(invincible == 0)begin
+						intAddressX <= 48;
+						intAddressY <= 0;
+					end
+					else begin
+						intAddressX <= 48;
+						intAddressY <= 48;
+					end
 				end
+
+
 			end
 		end
 

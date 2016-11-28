@@ -11,7 +11,7 @@ module enemies(
 
 	//3 bit wire carrying collision information
 	input [2:0] collision,
-
+	input [2:0] hit,
 	//link position for tracking movement
 	input	[8:0] link_x_pos,
 	input [7:0] link_y_pos,
@@ -106,7 +106,8 @@ module enemies(
 
 		.VGA_write			(VGA_write_1),
 
-		.draw_done			(draw_done_1));
+		.draw_done			(draw_done_1),
+		.hit				(hit[0]));
 	//using default x, y values
 
 	//enemy 2
@@ -136,9 +137,12 @@ module enemies(
 
 		.VGA_write			(VGA_write_2),
 
-		.draw_done			(draw_done_2));
+		.draw_done			(draw_done_2),
+		.hit				(hit[1]));
 	//using default x position
-	defparam enemy_2.Y_INITIAL = 8'd63;
+	defparam enemy_2.Y_INITIAL = 8'd63,
+				enemy_2.SEED0 = 9'b010100100,
+				enemy_2.SEED2 = 9'b101101100;
 
 	//enemy 3
 	single_enemy enemy_3(
@@ -167,9 +171,12 @@ module enemies(
 
 		.VGA_write			(VGA_write_3),
 
-		.draw_done			(draw_done_3));
+		.draw_done			(draw_done_3),
+		.hit				(hit[2]));
 	defparam enemy_3.X_INITIAL = 8'd111,
-				enemy_3.Y_INITIAL = 8'd159;
+				enemy_3.Y_INITIAL = 8'd143,
+				enemy_3.SEED1 = 9'b010101011,
+				enemy_3.SEED3 = 9'b010010101;
 
 	/** sequential logic **/
 	always@(posedge clock)
@@ -343,6 +350,5 @@ module enemies(
 //		else
 //			draw_done = OFF;
 //	end
-
 
 endmodule

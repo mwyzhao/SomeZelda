@@ -13,7 +13,7 @@ module single_enemy(
 	input 		gen_move,
 	input 		apply_move,
 	input 		draw,
-
+	input  		hit,
 	//collision signal from collision_detector
 	input 	  	collision,
 
@@ -53,7 +53,12 @@ module single_enemy(
 					ON 			= 1'b1,
 					OFF		 	= 1'b0,
 
-					MAX_COUNT 	= 8'd255;
+					MAX_COUNT 	= 8'd255,
+	
+					SEED0 = 9'b010010110,
+					SEED1 = 9'b001000001,
+					SEED2 = 9'b000010110,
+					SEED3 = 9'b010111001;				
 	/* NOTE: MUST DEFINE CUSTOM INITIAL POSITION USING DEFPARAM 
 	 * Default value x = 207, y = 95
 	 */
@@ -69,6 +74,10 @@ module single_enemy(
 		.clock(clock),
 		.reset(reset),
 		.init(init),
+		.seed0(SEED0),
+		.seed1(SEED1),
+		.seed2(SEED2),
+		.seed3(SEED3),
 		.out(move_interrupt));
 	/* include defparam here in case you want to change internal seed value
 	 * defparam SEED0 = 8'b1001010;
@@ -125,6 +134,17 @@ module single_enemy(
 			apply_count	<= 4'b0;
 			draw_done	<= OFF;
 		end
+		else if (hit)
+		begin
+			x_draw		<= 9'b0;
+			y_draw		<= 8'b0;
+			x_pos			<= X_INITIAL;
+			y_pos			<= Y_INITIAL;
+			count			<= 6'b0;
+			move_count	<= 4'b0;
+			apply_count	<= 4'b0;
+			draw_done	<= OFF;
+		end
 		
 		//will take in new move every 16 cycles
 		//move_count can be incremented in any state that runs every cycle
@@ -149,12 +169,12 @@ module single_enemy(
 			begin
 				if(link_y_pos < y_pos)
 					direction <= UP;
+				else if(link_x_pos > x_pos)
+					direction <= RIGHT;
 				else if(link_y_pos > y_pos)
 					direction <= DOWN;
 				else if(link_x_pos < x_pos)
 					direction <= LEFT;
-				else if(link_x_pos > x_pos)
-					direction <= RIGHT;
 			end
 		end
 

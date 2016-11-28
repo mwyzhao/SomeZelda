@@ -55,7 +55,7 @@ module collision_detector(
 					ON 		= 1'b1,
 					OFF 	= 1'b0,
 					MOVE_PRECISION_PX = 1'b1,
-					ATTACK_RANGE = 4'd8;
+					ATTACK_RANGE = 5'd16;
 
 	// 4 corners method of map collision
 	reg [7:0] xin_c;
@@ -304,13 +304,13 @@ module collision_detector(
 					e_hit = OFF;
 			end
 			else if (facing_char == LEFT)begin
-				if((diff_y < 5'd16) &&(char_x-enemy_x+5'd16  < ATTACK_RANGE) && (enemy_x<char_x))
+				if((diff_y < 5'd16) &&((char_x-(enemy_x+5'd16))  < ATTACK_RANGE) && (enemy_x<char_x))
 					e_hit = ON;
 				else 
 					e_hit = OFF;
 			end
 			else if (facing_char == RIGHT)begin
-				if((diff_y < 5'd16) &&(enemy_x- char_x+5'd16  < ATTACK_RANGE) && (enemy_x>char_x))
+				if((diff_y < 5'd16) &&((enemy_x- (char_x+5'd16))  < ATTACK_RANGE) && (enemy_x>char_x))
 					e_hit = ON;
 				else 
 					e_hit = OFF;
@@ -319,6 +319,8 @@ module collision_detector(
 				e_hit = OFF;
 
 		end
+		else
+			e_hit = OFF;
 
 		if( ((char_y ==0) && (direction_char == UP))||((char_x == 0) && (direction_char == LEFT)) || (((char_x+5'd16) == 255) &&(direction_char == RIGHT)) || (((char_y+5'd16) == 175) &&(direction_char == DOWN))  )
 			exception_c = ON;
@@ -330,13 +332,13 @@ module collision_detector(
 		else 
 			exception_e = OFF;
 		//if(collision_enable&& ((diff_x <5'd16&& diff_y < 5'd16) || !(&{col_e,col_e_tr, col_e_bl, col_e_br}) || !(&{col_c,col_c_tr, col_c_bl, col_c_br})) ) begin
-				if(collision_enable && (({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || ({col_c,col_c_tr, col_c_bl, col_c_br}!= 4'b1111) || (exception_c) || (exception_e)))begin
+		if(collision_enable && (({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || ({col_c,col_c_tr, col_c_bl, col_c_br}!= 4'b1111) || (exception_c) || ((diff_x <=16)&& (diff_y <=16))||(exception_e)))begin
 				
 				c_e_collision = OFF;
 				e_map_collision = OFF;
 				c_map_collision = OFF;
 			//if(!(&{col_e,col_e_tr, col_e_bl, col_e_br})) begin
-				if(({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || exception_e)begin
+			if(({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || exception_e)begin
 				e_map_collision = ON;
 				//facing_e_out = direction_enemy;
 			end
@@ -345,7 +347,7 @@ module collision_detector(
 				c_map_collision = ON;
 				//facing_c_out = direction_char;
 			end
-			if((diff_x <5'd16)&& (diff_y < 5'd16)) begin
+			if((diff_x <=16)&& (diff_y <=16)) begin
 				c_e_collision = ON;
 			end
 
