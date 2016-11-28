@@ -173,6 +173,7 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
 		
+		//remember to remove later
 		.link_x_pos(link_x_pos),
 		.link_y_pos(link_y_pos),
 
@@ -187,7 +188,9 @@ module zelda_game
 		.draw_map_done		(draw_map_done),
 		.draw_link_done	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
-		.testRom({enemy_c,link_c}));
+		
+		//remember to remove later
+		.testRom				({enemy_c,link_c}));
 
 endmodule
 

@@ -40,7 +40,7 @@ module datapath(
 	);
 	
 	/** parameters **/
-	parameter 	MAX_FRAME_COUNT = 24'd1, 	//count for for 30 fps 50MHz/30
+	parameter 	MAX_FRAME_COUNT = 24'd1666666, 	//count for for 30 fps 50MHz/30
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -67,23 +67,31 @@ module datapath(
 	wire [7:0] link_y_draw;
 	wire [2:0] link_direction;
 	wire [2:0] link_facing;
-	wire [5:0] link_colour;
 	wire [1:0] link_collision;
-	wire link_draw_done;
+	wire [5:0] link_colour;
 	wire link_write;
+	wire link_draw_done;
 
 	//enemy signal wires
-	wire [8:0] enemy_x_pos;
-	wire [7:0] enemy_y_pos;
+	wire [8:0] enemy_1_x_pos;
+	wire [7:0] enemy_1_y_pos;
+	wire [8:0] enemy_2_x_pos;
+	wire [7:0] enemy_2_y_pos;
+	wire [8:0] enemy_3_x_pos;
+	wire [7:0] enemy_3_y_pos;
 	wire [8:0] enemy_x_draw;
 	wire [7:0] enemy_y_draw;
-	wire [2:0] enemy_direction;
-	wire [2:0] enemy_facing;
-	wire [5:0] enemy_colour;
+	wire [2:0] enemy_1_direction;
+	wire [2:0] enemy_1_facing;
+	wire [2:0] enemy_2_direction;
+	wire [2:0] enemy_2_facing;
+	wire [2:0] enemy_3_direction;
+	wire [2:0] enemy_3_facing;
 	wire enemy_collision;
-	wire enemy_draw_done;
+	wire [5:0] enemy_colour;
 	wire enemy_write;
-	
+	wire enemy_draw_done;
+
 	wire e1_hit;
 
 	//frame counter limits actions to 50Hz
@@ -152,13 +160,13 @@ module datapath(
 		//data to load into VGA
 		.colour			(link_colour),
 
-		//link output finished signal
-		.draw_done 		(draw_link_done),
-
 		//VGA write enable
-		.VGA_write 		(link_write));
+		.VGA_write 		(link_write),
 
-	single_enemy blob_things(
+		//link output finished signal
+		.draw_done 		(draw_link_done));
+
+	enemies blob_things(
 		.clock 			(clock),
 		.reset 			(reset),
 
@@ -177,41 +185,65 @@ module datapath(
 		.link_y_pos		(link_y_pos),
 
 		//enemy position coordinates
-		.x_pos 			(enemy_x_pos),
-		.y_pos 			(enemy_y_pos),
-		.x_draw 		(enemy_x_draw),
-		.y_draw 		(enemy_y_draw),
+		.enemy_1_x_pos 			(enemy_1_x_pos),
+		.enemy_1_y_pos 			(enemy_1_y_pos),
+
+		.enemy_2_x_pos 			(enemy_2_x_pos),
+		.enemy_2_y_pos 			(enemy_2_y_pos),
+
+		.enemy_3_x_pos 			(enemy_3_x_pos),
+		.enemy_3_y_pos 			(enemy_3_y_pos),
+		
+		.x_draw 						(enemy_x_draw),
+		.y_draw 						(enemy_y_draw),
 
 		//enemy direction information
-		.direction		(enemy_direction),
-		.facing 		(enemy_facing),
+		.enemy_1_direction		(enemy_1_direction),
+		.enemy_1_facing 			(enemy_1_facing),
+
+		.enemy_2_direction		(enemy_2_direction),
+		.enemy_2_facing 			(enemy_2_facing),
+
+		.enemy_3_direction		(enemy_3_direction),
+		.enemy_3_facing 			(enemy_3_facing),
 
 		//data to load into VGA
-		.colour	 		(enemy_colour),
+		.colour	 					(enemy_colour),
 
-		.draw_done 		(draw_enemies_done),
+		.VGA_write 					(enemy_write),
 
-		.VGA_write 		(enemy_write));
+		.draw_done 					(draw_enemies_done));
 	
 	collision_detector cd(
-		.clock 				(clock),
-		.reset 				(reset),
-		.init 				(init),
+		.clock 					(clock),
+		.reset 					(reset),
+		.init 					(init),
 
 		//enable signal for calculations
 		.collision_enable 	(check_collide),
 
 		//input position coord for collision calculation
-		.char_x 				(link_x_pos),
-		.char_y	 			(link_y_pos),
-		.direction_char	(link_direction),
-		.facing_char		(link_facing),
+		.char_x 					(link_x_pos),
+		.char_y	 				(link_y_pos),
+		.direction_char		(link_direction),
+		.facing_char			(link_facing),
 
-		.enemy1_x 			(enemy_x_pos),
-		.enemy1_y 			(enemy_y_pos),
-		.direction_enemy1	(enemy_direction),
-		.facing_enemy1		(enemy_facing),
-		.attack 				(OFF),
+		.enemy1_x 				(enemy_1_x_pos),
+		.enemy1_y 				(enemy_1_y_pos),
+		.direction_enemy1		(enemy_1_direction),
+		.facing_enemy1			(enemy_1_facing),
+			
+//		.enemy2_x 				(enemy_2_x_pos),
+//		.enemy2_y 				(enemy_2_y_pos),
+//		.direction_enemy2		(enemy_2_direction),
+//		.facing_enemy2			(enemy_2_facing),
+//		
+//
+//		.enemy3_x 				(enemy_3_x_pos),
+//		.enemy3_y 				(enemy_3_y_pos),
+//		.direction_enemy3		(enemy_3_direction),
+//		.facing_enemy3			(enemy_3_facing),
+		.attack 					(OFF),
 
 		//output collision true,false signals
 		.c_map_collision		(link_collision[0]),

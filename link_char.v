@@ -34,11 +34,11 @@ module link_char(
 	//memory output data for vga
 	output 	 	[5:0] colour,
 
-	//output finished signals
-	output reg 			draw_done,
-
 	//output write enable to VGA
-	output  			VGA_write
+	output  			VGA_write,
+
+	//output finished signals
+	output reg 			draw_done
 	);
 
 	/** local parameters **/
@@ -57,6 +57,7 @@ module link_char(
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
+
 	translateLinkSprite64x48 t0(.x(spriteAddressX),
 							 .y(spriteAddressY),
 							 .mem_address(spriteMemAddress)
