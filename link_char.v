@@ -57,7 +57,7 @@ module link_char(
 
 	/** ram for link character sprites which includes
 		8 link walking sprites and 8 link attacking sprites **/
-	translateLinkSprite64x48(.x(spriteAddressX),
+	translateLinkSprite64x48 t0(.x(spriteAddressX),
 							 .y(spriteAddressY),
 							 .mem_address(spriteMemAddress)
 							 );
