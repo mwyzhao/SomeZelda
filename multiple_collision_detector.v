@@ -32,25 +32,25 @@ module multiple_collision_detector(
 	 * set to 1 if true, 0 if false */
 	/* these signals are sent to the character and enemy logic modules
 	 * which will adjust the path necessarily */
-	/* c = player character, e1 = enemy1, e2 = enemy2 */
-	output reg	c_map_collision,
+	/* c = player character, e = enemy1, e2 = enemy2 */
+	output	c_map_collision,
 
-	output reg	e1_map_collision,
-	output reg	c_e1_collision,
-	output reg  e1_hit,
-	output reg	done1,
+	output	e1_map_collision,
+	output	c_e1_collision,
+	output  e1_hit,
 
-	output reg	e2_map_collision,
-	output reg	c_e2_collision,
-	output reg  e2_hit,
-	output reg	done2,
+	output	e2_map_collision,
+	output	c_e2_collision,
+	output  e2_hit,
 
-	output reg	e3_map_collision,
-	output reg	c_e3_collision,
-	output reg  e3_hit,
-	output reg	done3,
-
+	output	e3_map_collision,
+	output	c_e3_collision,
+	output  e3_hit,
+	
+	output	done,
 	);
+
+	assign done = done1&done2&done3;
 
 	collision_detector c1(.clock(clock),
 						  .reset(reset),
@@ -61,14 +61,14 @@ module multiple_collision_detector(
 						  .direction_char(direction_char),
 						  .facing_char(facing_char),
 						  .attack(attack),
-						  .enemy1_x(enemy1_x),
-						  .enemy1_y(enemy1_y),
-						  .direction_enemy1(direction_enemy1),
-						  .facing_enemy1(facing_enemy1),
+						  .enemy_x(enemy1_x),
+						  .enemy_y(enemy1_y),
+						  .direction_enemy(direction_enemy1),
+						  .facing_enemy(facing_enemy1),
 						  .c_map_collision(c_map_collision),
-						  .e1_map_collision(e1_map_collision),
-						  .c_e1_collision(c_e1_collision),
-						  .e1_hit(e1_hit),
+						  .e_map_collision(e1_map_collision),
+						  .c_e_collision(c_e1_collision),
+						  .e_hit(e1_hit),
 						  .done(done1)
 						  );
 	collision_detector c2(.clock(clock),
@@ -80,14 +80,14 @@ module multiple_collision_detector(
 						  .direction_char(direction_char),
 						  .facing_char(facing_char),
 						  .attack(attack),
-						  .enemy1_x(enemy2_x),
-						  .enemy1_y(enemy2_y),
-						  .direction_enemy1(direction_enemy2),
-						  .facing_enemy1(facing_enemy2),
+						  .enemy_x(enemy2_x),
+						  .enemy_y(enemy2_y),
+						  .direction_enemy(direction_enemy2),
+						  .facing_enemy(facing_enemy2),
 						  //.c_map_collision(c_map_collision),
-						  .e1_map_collision(e2_map_collision),
-						  .c_e1_collision(c_e2_collision),
-						  .e1_hit(e2_hit),
+						  .e_map_collision(e2_map_collision),
+						  .c_e_collision(c_e2_collision),
+						  .e_hit(e2_hit),
 						  .done(done2)
 						  );
 	collision_detector c3(.clock(clock),
@@ -99,14 +99,14 @@ module multiple_collision_detector(
 						  .direction_char(direction_char),
 						  .facing_char(facing_char),
 						  .attack(attack),
-						  .enemy1_x(enemy3_x),
-						  .enemy1_y(enemy3_y),
-						  .direction_enemy1(direction_enemy3),
-						  .facing_enemy1(facing_enemy3),
+						  .enemy_x(enemy3_x),
+						  .enemy_y(enemy3_y),
+						  .direction_enemy(direction_enemy3),
+						  .facing_enemy(facing_enemy3),
 						  //.c_map_collision(c_map_collision),
-						  .e1_map_collision(e3_map_collision),
-						  .c_e1_collision(c_e3_collision),
-						  .e1_hit(e3_hit),
+						  .e_map_collision(e3_map_collision),
+						  .c_e_collision(c_e3_collision),
+						  .e_hit(e3_hit),
 						  .done(done3)
 						  );
 

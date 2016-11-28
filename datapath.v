@@ -36,7 +36,7 @@ module datapath(
 	output 			draw_link_done, 		//DRAW DONE SIGNAL 				FOR CONTROL
 	output 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FOR CONTROL
 	
-	output [7:0] testRom
+	//output [7:0] testRom
 	);
 	
 	/** parameters **/
@@ -87,12 +87,16 @@ module datapath(
 	wire [2:0] enemy_2_facing;
 	wire [2:0] enemy_3_direction;
 	wire [2:0] enemy_3_facing;
-	wire enemy_collision;
+	wire enemy1_collision;
+	wire enemy2_collision;
+	wire enemy3_collision;
 	wire [5:0] enemy_colour;
 	wire enemy_write;
 	wire enemy_draw_done;
 
 	wire e1_hit;
+
+	assign enemy_collision = 
 
 	//frame counter limits actions to 50Hz
 	//21 bits for overflow safety
@@ -178,7 +182,7 @@ module datapath(
 		.draw			(draw_enemies),
 
 		//collision signal
-		.collision 		(enemy_collision),
+		.collision 		({enemy3_collision,enemy2_collision,enemy1_collision}),
 
 		//link position coordinates for movement
 		.link_x_pos		(link_x_pos),
@@ -199,13 +203,8 @@ module datapath(
 
 		//enemy direction information
 		.enemy_1_direction		(enemy_1_direction),
-		.enemy_1_facing 			(enemy_1_facing),
-
 		.enemy_2_direction		(enemy_2_direction),
-		.enemy_2_facing 			(enemy_2_facing),
-
 		.enemy_3_direction		(enemy_3_direction),
-		.enemy_3_facing 			(enemy_3_facing),
 
 		//data to load into VGA
 		.colour	 					(enemy_colour),
@@ -214,7 +213,7 @@ module datapath(
 
 		.draw_done 					(draw_enemies_done));
 	
-	collision_detector cd(
+	multiple_collision_detector multi_cd(
 		.clock 					(clock),
 		.reset 					(reset),
 		.init 					(init),
@@ -227,32 +226,37 @@ module datapath(
 		.char_y	 				(link_y_pos),
 		.direction_char		(link_direction),
 		.facing_char			(link_facing),
+		.attack 					((link_direction == ATTACK)),
 
 		.enemy1_x 				(enemy_1_x_pos),
 		.enemy1_y 				(enemy_1_y_pos),
 		.direction_enemy1		(enemy_1_direction),
-		.facing_enemy1			(enemy_1_facing),
 			
-//		.enemy2_x 				(enemy_2_x_pos),
-//		.enemy2_y 				(enemy_2_y_pos),
-//		.direction_enemy2		(enemy_2_direction),
-//		.facing_enemy2			(enemy_2_facing),
-//		
-//
-//		.enemy3_x 				(enemy_3_x_pos),
-//		.enemy3_y 				(enemy_3_y_pos),
-//		.direction_enemy3		(enemy_3_direction),
-//		.facing_enemy3			(enemy_3_facing),
-		.attack 					(OFF),
+		.enemy2_x 				(enemy_2_x_pos),
+		.enemy2_y 				(enemy_2_y_pos),
+		.direction_enemy2		(enemy_2_direction),
+		
+
+		.enemy3_x 				(enemy_3_x_pos),
+		.enemy3_y 				(enemy_3_y_pos),
+		.direction_enemy3		(enemy_3_direction),
 
 		//output collision true,false signals
 		.c_map_collision		(link_collision[0]),
 		.c_e1_collision 		(link_collision[1]),
-		.e1_map_collision 	(enemy_collision),
+		.c_e2_collision 		(link_collision[2]),
+		.c_e3_collision 		(link_collision[3]),
+
+		.e1_map_collision 	(enemy1_collision),
+		.e2_map_collision 	(enemy2_collision),
+		.e3_map_collision 	(enemy3_collision),
+
 		.e1_hit					(e1_hit),
+		.e2_hit					(e2_hit),
+		.e3_hit					(e3_hit),
 		
-		.done 					(check_collide_done),
-		.testRom 				(testRom));
+		.done 					(check_collide_done));
+		// .testRom 				(testRom));
 
 	/** combinational logic **/
 	always@(*)

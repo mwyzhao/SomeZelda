@@ -31,14 +31,9 @@ module enemies(
 
 	//enemy direction data for collision_detector
 	output [2:0] enemy_1_direction,
-	output [2:0] enemy_1_facing,
-
 	output [2:0] enemy_2_direction,
-	output [2:0] enemy_2_facing,
-
 	output [2:0] enemy_3_direction,
-	output [2:0] enemy_3_facing,
-
+	
 	//memory output data for VGA
 	output reg [5:0] colour,
 
@@ -99,7 +94,6 @@ module enemies(
 		.y_draw				(enemy_1_y_draw),
 
 		.direction			(enemy_1_direction),
-		.facing				(enemy_1_facing),
 
 		.colour				(colour_1),
 
@@ -130,7 +124,6 @@ module enemies(
 		.y_draw				(enemy_2_y_draw),
 
 		.direction			(enemy_2_direction),
-		.facing				(enemy_2_facing),
 
 		.colour				(colour_2),
 
@@ -162,7 +155,6 @@ module enemies(
 		.y_draw				(enemy_3_y_draw),
 
 		.direction			(enemy_3_direction),
-		.facing				(enemy_3_facing),
 
 		.colour				(colour_3),
 
@@ -175,7 +167,13 @@ module enemies(
 	/** combinational logic **/
 	always@(*)
 	begin
-		if(draw)
+		if(reset)
+		begin
+			draw_1 = OFF;
+			draw_2 = OFF;
+			draw_3 = OFF;
+		end
+		else if(draw)
 		begin
 			//start drawing enemy 1 when draw signal is on
 			draw_1 = ON;
@@ -190,7 +188,6 @@ module enemies(
 
 			//after enemy 1 is done start drawing draw enemy 2
 			if(draw_done_1)
-			begin
 				draw_2 = ON;
 				//connect colour and VGA_write to enemy 2 while drawing
 				if(!draw_done_2)
@@ -200,11 +197,9 @@ module enemies(
 					colour = colour_2;
 					VGA_write = VGA_write_2;
 				end
-			end
 
 			//after enemy 2 is done start drawing draw enemy 3
 			if(draw_done_2)
-			begin
 				draw_3 = ON;
 				//connect colour and VGA_write to enemy 3 while drawing
 				if(!draw_done_3)
@@ -214,7 +209,6 @@ module enemies(
 					colour = colour_3;
 					VGA_write = VGA_write_3;
 				end
-			end
 
 			//done drawing all, set draw_done to on
 			if(draw_done_3)
@@ -222,16 +216,7 @@ module enemies(
 		end
 
 		else
-		begin
-			x_draw = 9'b0;
-			y_draw = 8'b0;
-			colour = 6'b0;
-			draw_1 = OFF;
-			draw_2 = OFF;
-			draw_3 = OFF;
-			VGA_write = OFF;
 			draw_done = OFF;
-		end
 	end
 
 
