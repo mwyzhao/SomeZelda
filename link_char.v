@@ -41,6 +41,8 @@ module link_char(
 	
 	output reg [2:0]hp
 	);
+	
+	initial hp = 3'b110;
 
 	/** local parameters **/
 	localparam 	NO_ACTION 	= 3'b000,
@@ -75,7 +77,7 @@ module link_char(
 	reg [5:0] intAddressY;
 	wire [11:0]spriteMemAddress;
 	
-	reg [3:0] invincible;
+	reg [5:0] invincible;
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
@@ -92,7 +94,7 @@ module link_char(
 	begin
 		if(collision[3:1] != 3'b000 && invincible==0)begin
 			hp <= hp -1;
-			invincible <= 4'b1111;
+			invincible <= 6'b111111;
 		end
 		if(reset)
 		begin

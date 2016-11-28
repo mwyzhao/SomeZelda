@@ -20,20 +20,14 @@ module datapath(
 	input 			draw_link, 			//DRAW LINK SIGNAL 				FROM CONTROL
 	input 			draw_enemies, 		//DRAW ENEMY SIGNAL 			FROM CONTROL
 	input 			draw_to_vga,
-
-	output [8:0] enemy_1_x_pos,
-	output [7:0] enemy_1_y_pos,
-	output [8:0] enemy_2_x_pos,
-	output [7:0] enemy_2_y_pos,
-	output [8:0] enemy_3_x_pos,
-	output [7:0] enemy_3_y_pos,
 	
-	output [3:0] c_e_test,
+	output [2:0] link_hp,
+	output [11:0] score,
 	
 	output reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
 	output reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
-	output		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
-	output reg		VGA_enable,			//WRITE ENABLE SIGNAL 			FOR VGA
+	output reg		[5:0] fb_colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
+	output reg		fb_wren,			//WRITE ENABLE SIGNAL 			FOR VGA
 
 	//probably don't need the commented out signals
 	output reg		idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
@@ -77,15 +71,16 @@ module datapath(
 	wire [2:0] link_facing;
 	wire [3:0] link_collision;
 	wire [5:0] link_colour;
+	wire [2:0] hp;
 	wire link_write;
 	assign c_e_test = {e3_hit,e2_hit,e1_hit,1'b0};
 	//enemy signal wires
-//	wire [8:0] enemy_1_x_pos;
-//	wire [7:0] enemy_1_y_pos;
-//	wire [8:0] enemy_2_x_pos;
-//	wire [7:0] enemy_2_y_pos;
-//	wire [8:0] enemy_3_x_pos;
-//	wire [7:0] enemy_3_y_pos;
+	wire [8:0] enemy_1_x_pos;
+	wire [7:0] enemy_1_y_pos;
+	wire [8:0] enemy_2_x_pos;
+	wire [7:0] enemy_2_y_pos;
+	wire [8:0] enemy_3_x_pos;
+	wire [7:0] enemy_3_y_pos;
 	wire [8:0] enemy_x_draw;
 	wire [7:0] enemy_y_draw;
 	wire [2:0] enemy_1_direction;
@@ -104,6 +99,9 @@ module datapath(
 	wire [2:0] e_hit;
 	wire [5:0] enemy_colour;
 	wire enemy_write;
+	
+	//remove later
+	reg VGA_enable;
 
 	assign enemy_collision = {enemy3_collision,enemy2_collision,enemy1_collision};
 	assign e_hit = {e3_hit,e2_hit,e1_hit};
@@ -112,9 +110,9 @@ module datapath(
 	//24	bits for overflow safety
 	reg  [27:0] frame_counter;
 
-	reg [5:0] fb_colour;	
+	//reg [5:0] fb_colour;	
 	wire [15:0] fb_address;
-	reg fb_wren;
+	//reg fb_wren;
 
 	reg [15:0] buffer_count;
 
@@ -193,7 +191,9 @@ module datapath(
 		.VGA_write 		(link_write),
 
 		//link output finished signal
-		.draw_done 		(draw_link_done));
+		.draw_done 		(draw_link_done),
+
+		.hp				(link_hp));
 		
 	enemies blob_things(
 		.clock 			(clock),
@@ -233,6 +233,8 @@ module datapath(
 		.enemy_1_direction		(enemy_1_direction),
 		.enemy_2_direction		(enemy_2_direction),
 		.enemy_3_direction		(enemy_3_direction),
+		
+		.score						(score),
 
 		//data to load into VGA
 		.colour	 					(enemy_colour),
@@ -410,6 +412,7 @@ module datapath(
 			idle_done 		<= OFF;
 
 		end
+			
 
 		//always increment counter
 		frame_counter 	<= frame_counter + 1'b1;

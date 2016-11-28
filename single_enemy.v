@@ -32,6 +32,8 @@ module single_enemy(
 
 	//memory output data for VGA
 	output 		[5:0] colour,
+	
+	output reg  [11:0] score,
 
 	//output write enable to VGA
 	output  		VGA_write,
@@ -113,6 +115,7 @@ module single_enemy(
 		if(reset)
 		begin
 			//reset block, resets all registers to 0;
+			score 		<= 12'b0;
 			x_draw		<= 9'b0;
 			y_draw		<= 8'b0;
 			x_pos			<= X_INITIAL;
@@ -125,6 +128,7 @@ module single_enemy(
 		else if(init)
 		begin
 			//initialize first time character appears on map
+			score 		<= 12'b0;
 			x_draw		<= 8'b0;
 			y_draw		<= 8'b0;
 			x_pos			<= X_INITIAL;
@@ -136,6 +140,7 @@ module single_enemy(
 		end
 		else if (hit)
 		begin
+			score <= score + 1'b1;
 			x_draw		<= 9'b0;
 			y_draw		<= 8'b0;
 			x_pos			<= X_INITIAL;

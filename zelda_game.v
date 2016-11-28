@@ -102,18 +102,31 @@ module zelda_game
 	wire draw_link_done, draw_enemies_done, draw_vga_done;
 	
 	wire [2:0] link_hp;
+	wire [11:0] score;
+
+	hexDecoder scl(
+		.bin(score[3:0]),
+	 	.hout(HEX0));
+		
+	hexDecoder scm(
+		.bin(score[7:4]),
+	 	.hout(HEX1));
+	
+	hexDecoder sch(
+		.bin(score[11:8]),
+	 	.hout(HEX2));
+		
+	hex_decoder ha(
+		.data(4'b1111),
+		.hex(HEX3));
 
 	hexDecoder hp0(
 		.bin({1'b0,link_hp}),
-		.hout(HEX2));
+		.hout(HEX4));
 	
 	hexDecoder hp1(
 		.bin(4'b0),
-		.hout(HEX3));
-
-	// hexDecoder e1x2(
-	// 	.bin(enemy_3_x_pos[3:0]),
-	// 	.hout(HEX4));
+		.hout(HEX5));
 
 	control C(
 		//inputs
@@ -128,6 +141,7 @@ module zelda_game
 		.draw_link_done 	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
 		.draw_vga_done		(draw_vga_done),
+		.link_hp				(link_hp),
 
 		//outputs
 		.states 				(LEDR[3:0]),
@@ -166,12 +180,15 @@ module zelda_game
 		.draw_to_vga 		(draw_to_vga),
 		
 		//outputs
-		.link_hp			(link_hp)
+		.link_hp			(link_hp),
+		.score			(score),
 		.x_position			(x),
 		.y_position			(y),
-		.colour 			(colour),
-		.VGA_enable 		(writeEn),
-
+		//.colour 			(colour),
+		.fb_colour			(colour),
+		//.VGA_enable 		(writeEn),
+		.fb_wren			(writeEn),
+		
 		.idle_done			(idle_done),
 		.gen_move_done		(gen_move_done),
 		.check_collide_done(check_collide_done),

@@ -36,6 +36,8 @@ module enemies(
 	output [2:0] enemy_2_direction,
 	output [2:0] enemy_3_direction,
 	
+	output [11:0] score,
+	
 	//memory output data for VGA
 	output reg [5:0] colour,
 
@@ -57,7 +59,7 @@ module enemies(
 	//draw enable signals for each enemy module
 	reg draw_1, draw_2, draw_3;
 	
-	reg [1:0] gen_count;
+	reg [9:0] draw_count;
 
 	//wires for each enemies
 	wire [8:0] enemy_1_x_draw;
@@ -77,6 +79,10 @@ module enemies(
 	wire [5:0] colour_3;
 	wire VGA_write_3;
 	wire draw_done_3;
+	
+	wire [11:0] score_1,score_2,score_3;
+	
+	assign score = score_1 + score_2 + score_3;
 
 	/** enemy modules **/
 	//enemy 1
@@ -103,6 +109,8 @@ module enemies(
 		.direction			(enemy_1_direction),
 
 		.colour				(colour_1),
+		
+		.score				(score_1),
 
 		.VGA_write			(VGA_write_1),
 
@@ -134,6 +142,8 @@ module enemies(
 		.direction			(enemy_2_direction),
 
 		.colour				(colour_2),
+		
+		.score				(score_2),
 
 		.VGA_write			(VGA_write_2),
 
@@ -168,6 +178,8 @@ module enemies(
 		.direction			(enemy_3_direction),
 
 		.colour				(colour_3),
+		
+		.score				(score_3),
 
 		.VGA_write			(VGA_write_3),
 
@@ -183,7 +195,7 @@ module enemies(
 	begin
 		if(reset)
 		begin
-			gen_count <= 2'b0;
+			draw_count <= 10'b0;
 			draw_1 <= OFF;
 			draw_2 <= OFF;
 			draw_3 <= OFF;
@@ -195,7 +207,7 @@ module enemies(
 		
 		else if(init)
 		begin
-			gen_count <= 2'b0;
+			draw_count <= 10'b0;
 			draw_1 <= OFF;
 			draw_2 <= OFF;
 			draw_3 <= OFF;
@@ -205,63 +217,36 @@ module enemies(
 			VGA_write = OFF;
 		end
 		
-		if(gen_move)
-		begin
-			gen_count <= gen_count + 1'b1;
-			if(gen_count == 2'b00)
-			begin
-				gen_move_1 <= ON;
-				gen_move_2 <= OFF;
-				gen_move_3 <= OFF;
-				gen_move_done <= OFF;
-			end
-			if(gen_count == 2'b01)
-			begin
-				gen_move_1 <= OFF;
-				gen_move_2 <= ON;
-				gen_move_3 <= OFF;
-				gen_move_done <= OFF;
-			end
-			if(gen_count == 2'b10)
-			begin
-				gen_move_1 <= OFF;
-				gen_move_2 <= OFF;
-				gen_move_3 <= ON;
-				gen_move_done <= OFF;
-			end
-			if(gen_count == 2'b11)
-			begin
-				gen_count <= 2'b0;
-				gen_move_1 <= OFF;
-				gen_move_2 <= OFF;
-				gen_move_3 <= OFF;
-				gen_move_done <= ON;				
-			end
-		end
-		
 		if(draw)
 		begin
-			if(!draw_done_1 && !draw_2 && !draw_3)
+			if(draw_count < 10'd256)
 			begin
+				draw_count <= draw_count + 1'b1;
 				draw_1 <= ON;
+				draw_2 <= OFF;
+				draw_3 <= OFF;
 				x_draw = enemy_1_x_draw;
 				y_draw = enemy_1_y_draw;
 				colour = colour_1;
 				VGA_write = VGA_write_1;
 			end
 			
-			else if(!draw_done_2 && (draw_done_1 || draw_2))
+			else if(draw_count < 10'd513)
 			begin
+				draw_count <= draw_count + 1'b1;
 				draw_1 <= OFF;
 				draw_2 <= ON;
+				draw_3 <= OFF;
 				x_draw = enemy_2_x_draw;
 				y_draw = enemy_2_y_draw;
 				colour = colour_2;
 				VGA_write = VGA_write_2;
 			end
 			
-			else if(!draw_done_3 && (draw_done_2 || draw_3))
+			else if(draw_count < 10'd770)
 			begin
+				draw_count <= draw_count + 1'b1;
+				draw_1 <= OFF;
 				draw_2 <= OFF;
 				draw_3 <= ON;
 				x_draw = enemy_3_x_draw;
@@ -273,6 +258,7 @@ module enemies(
 			else
 			begin
 				draw_done <= ON;
+				draw_count <= 10'b0;
 				draw_1 <= OFF;
 				draw_2 <= OFF;
 				draw_3 <= OFF;
@@ -286,69 +272,5 @@ module enemies(
 		else
 			draw_done <= OFF;
 	end
-			
-		
-	/** combinational logic **/
-//	always@(*)
-//	begin
-//		if(reset)
-//		begin
-//			draw_1 = OFF;
-//			draw_2 = OFF;
-//			draw_3 = OFF;
-//		end
-//		
-//		else if(init)
-//		begin
-//			draw_1 = OFF;
-//			draw_2 = OFF;
-//			draw_3 = OFF;
-//		end
-//		
-//		else if(draw)
-//		begin
-//			//start drawing enemy 1 when draw signal is on
-//			draw_1 = ON;
-//			//connect colour and VGA_write to enemy 1 while drawing
-//			if(!draw_done_1)
-//			begin
-//				x_draw = enemy_1_x_draw;
-//				y_draw = enemy_1_y_draw;
-//				colour = colour_1;
-//				VGA_write = VGA_write_1;
-//			end
-//
-//			//after enemy 1 is done start drawing draw enemy 2
-//			if(draw_done_1)
-//				draw_2 = ON;
-//				//connect colour and VGA_write to enemy 2 while drawing
-//				if(!draw_done_2)
-//				begin
-//					x_draw = enemy_2_x_draw;
-//					y_draw = enemy_2_y_draw;
-//					colour = colour_2;
-//					VGA_write = VGA_write_2;
-//				end
-//
-//			//after enemy 2 is done start drawing draw enemy 3
-//			if(draw_done_2)
-//				draw_3 = ON;
-//				//connect colour and VGA_write to enemy 3 while drawing
-//				if(!draw_done_3)
-//				begin
-//					x_draw = enemy_3_x_draw;
-//					y_draw = enemy_3_y_draw;
-//					colour = colour_3;
-//					VGA_write = VGA_write_3;
-//				end
-//
-//			//done drawing all, set draw_done to on
-//			if(draw_done_3)
-//				draw_done = ON;
-//		end
-//
-//		else
-//			draw_done = OFF;
-//	end
 
 endmodule

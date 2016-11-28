@@ -12,6 +12,7 @@ module control(
 	input 			draw_link_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input				draw_vga_done,
+	input 	[2:0] link_hp,
 
 	output 	[3:0] states,
 	
@@ -38,6 +39,7 @@ module control(
 					S_DRAW_LINK 		= 4'b0111, 		//DRAW USER CHARACTER
 					S_DRAW_ENEMIES 		= 4'b1000, 		//DRAW ENEMIES
 					S_DRAW_TO_VGA		= 4'b1001,
+					S_END					= 4'b1010,
 					ON 					= 1'b1,
 					OFF 				= 1'b0;
 
@@ -51,14 +53,15 @@ module control(
 		case(current_state)
 			S_INIT: 				next_state = S_DRAW_MAP;
 			S_IDLE:					next_state = idle_done ? S_GEN_MOVEMENT : S_IDLE;
-			S_GEN_MOVEMENT: 		next_state = gen_move_done ? S_CHECK_COLLIDE : S_GEN_MOVEMENT;
+			S_GEN_MOVEMENT: 		next_state = S_CHECK_COLLIDE;
 			S_CHECK_COLLIDE:	 	next_state = check_collide_done? S_LINK_ACTION : S_CHECK_COLLIDE;
 			S_LINK_ACTION:			next_state = S_MOVE_ENEMIES;
 			S_MOVE_ENEMIES: 		next_state = S_DRAW_MAP;
 			S_DRAW_MAP:				next_state = draw_map_done ? S_DRAW_LINK : S_DRAW_MAP;
 			S_DRAW_LINK: 			next_state = draw_link_done ? S_DRAW_ENEMIES : S_DRAW_LINK;
-			S_DRAW_ENEMIES:			next_state = draw_enemies_done ? S_DRAW_TO_VGA : S_DRAW_ENEMIES;
-			S_DRAW_TO_VGA:			next_state = draw_vga_done ? S_IDLE : S_DRAW_TO_VGA;
+			S_DRAW_ENEMIES:			next_state = draw_enemies_done ? S_IDLE : S_DRAW_ENEMIES;
+			//S_DRAW_TO_VGA:			next_state = draw_vga_done ? S_IDLE : S_DRAW_TO_VGA;
+			S_END:					next_state = S_END;
 			default:				next_state = S_IDLE;
 		endcase
 	end
@@ -107,6 +110,8 @@ module control(
 	begin
 		if(reset)
 			current_state <= S_INIT;
+		else if(link_hp == 3'b0)
+			current_state <= S_END;
 		else
 			current_state <= next_state;
 	end
