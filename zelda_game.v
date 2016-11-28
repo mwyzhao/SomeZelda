@@ -123,34 +123,30 @@ module zelda_game
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies));
-
-		wire [3:0] enemy_c,link_c;
-		wire [8:0] link_x_pos;
-		wire [7:0] link_y_pos;
 	
-	hexDecoder Hx1(
-		.bin(link_x_pos[7:4]),
-		.hout(HEX5));
+//	hexDecoder Hx1(
+//		.bin(link_x_pos[7:4]),
+//		.hout(HEX5));
+//	
+//	hexDecoder Hx2(
+//		.bin(link_x_pos[3:0]),
+//		.hout(HEX4));
+//	
+//	hexDecoder Hy1(
+//		.bin(link_y_pos[7:4]),
+//		.hout(HEX3));
+//		
+//	hexDecoder Hy2(
+//		.bin(link_y_pos[3:0]),
+//		.hout(HEX2));
 	
-	hexDecoder Hx2(
-		.bin(link_x_pos[3:0]),
-		.hout(HEX4));
-	
-	hexDecoder Hy1(
-		.bin(link_y_pos[7:4]),
-		.hout(HEX3));
+	// hex_decoder h1(
+	// 	.data(enemy_c),
+	// 	.hex(HEX1));
 		
-	hexDecoder Hy2(
-		.bin(link_y_pos[3:0]),
-		.hout(HEX2));
-	
-	hex_decoder h1(
-		.data(enemy_c),
-		.hex(HEX1));
-		
-	hex_decoder h0(
-		.data(link_c),
-		.hex(HEX0));
+	// hex_decoder h0(
+	// 	.data(link_c),
+	// 	.hex(HEX0));
 		
 	datapath D(
 		//inputs
@@ -172,10 +168,6 @@ module zelda_game
 		.draw_map			(draw_map),
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
-		
-		//remember to remove later
-		.link_x_pos(link_x_pos),
-		.link_y_pos(link_y_pos),
 
 		//outputs
 		.x_position			(x),
@@ -187,10 +179,10 @@ module zelda_game
 		.check_collide_done(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done	(draw_link_done),
-		.draw_enemies_done(draw_enemies_done),
+		.draw_enemies_done(draw_enemies_done));
 		
 		//remember to remove later
-		.testRom				({enemy_c,link_c}));
+	//	.testRom				({enemy_c,link_c}));
 
 endmodule
 

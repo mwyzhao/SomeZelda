@@ -27,24 +27,21 @@ module collision_detector(
 	input 		[2:0] facing_char,
 	input 		attack,
 	//position for enemies
-	input		[8:0] enemy1_x,
-	input		[7:0] enemy1_y,
-	input 		[2:0] direction_enemy1,
-	input 		[2:0] facing_enemy1,
+	input		[8:0] enemy_x,
+	input		[7:0] enemy_y,
+	input 		[2:0] direction_enemy,
 
 	/* output signals indicating if any collisions have occurred
 	 * set to 1 if true, 0 if false */
 	/* these signals are sent to the character and enemy logic modules
 	 * which will adjust the path necessarily */
-	/* c = player character, e1 = enemy1, e2 = enemy2 */
+	/* c = player character, e = enemy, e2 = enemy2 */
 	output reg	c_map_collision,
-	output reg	e1_map_collision,
-	output reg	c_e1_collision,
-	output reg  e1_hit,
-	output reg	done,
-	output reg [7:0] testRom
-	//output reg [1:0] facing_c_out;
-	//output reg [1:0] facing_e_out;
+	output reg	e_map_collision,
+	output reg	c_e_collision,
+	output reg  e_hit,
+	output reg	done
+	//output reg [7:0] testRom
 	);
 
 	localparam 		NO_ACTION 		= 3'b000,
@@ -61,23 +58,23 @@ module collision_detector(
 					ATTACK_RANGE = 4'd8;
 
 	// 4 corners method of map collision
-	reg [8:0] xin_c;
+	reg [7:0] xin_c;
 	reg [7:0] yin_c;
-	reg [8:0] xin_c_tr;
+	reg [7:0] xin_c_tr;
 	reg [7:0] yin_c_tr;
-	reg [8:0] xin_c_bl;
+	reg [7:0] xin_c_bl;
 	reg [7:0] yin_c_bl;
-	reg [8:0] xin_c_br;
+	reg [7:0] xin_c_br;
 	reg [7:0] yin_c_br;
 
 
-	reg [8:0] xin_e;
+	reg [7:0] xin_e;
 	reg [7:0] yin_e;
-	reg [8:0] xin_e_tr;
+	reg [7:0] xin_e_tr;
 	reg [7:0] yin_e_tr;
-	reg [8:0] xin_e_bl;
+	reg [7:0] xin_e_bl;
 	reg [7:0] yin_e_bl;
-	reg [8:0] xin_e_br;
+	reg [7:0] xin_e_br;
 	reg [7:0] yin_e_br;
 
 
@@ -91,20 +88,20 @@ module collision_detector(
 	wire col_e_bl;
 	wire col_e_br;
 
-	reg [8:0] diff_x;
+	reg [7:0] diff_x;
 	reg [7:0] diff_y;
 	
 	reg exception_c;
 	reg exception_e;
-	wire [16:0] address_c;
-	wire [16:0] address_c_tr;
-	wire [16:0] address_c_bl;
-	wire [16:0] address_c_br;
+	wire [15:0] address_c;
+	wire [15:0] address_c_tr;
+	wire [15:0] address_c_bl;
+	wire [15:0] address_c_br;
 
-	wire [16:0] address_e;
-	wire [16:0] address_e_tr;
-	wire [16:0] address_e_bl;
-	wire [16:0] address_e_br;
+	wire [15:0] address_e;
+	wire [15:0] address_e_tr;
+	wire [15:0] address_e_bl;
+	wire [15:0] address_e_br;
 	
 	reg [3:0] count;
 
@@ -187,56 +184,56 @@ module collision_detector(
 	always@(*)begin
 		
 		//LINK!!!!!!!! woahhh
-		diff_x = (char_x > enemy1_x)?(char_x - enemy1_x):(enemy1_x-char_x);
-		diff_y = (char_y > enemy1_y)?(char_y - enemy1_y):(enemy1_y-char_y);
+		diff_x = (char_x > enemy_x)?(char_x - enemy_x):(enemy_x-char_x);
+		diff_y = (char_y > enemy_y)?(char_y - enemy_y):(enemy_y-char_y);
 		if(direction_char == UP)begin
 			xin_c = char_x;
-			xin_c_tr = char_x + 16;
+			xin_c_tr = char_x + 5'd16;
 			xin_c_bl = char_x;
-			xin_c_br = char_x + 16;
+			xin_c_br = char_x + 5'd16;
 
 			yin_c = char_y -MOVE_PRECISION_PX;
 			yin_c_tr = char_y -MOVE_PRECISION_PX;
-			yin_c_bl = char_y -MOVE_PRECISION_PX + 16;
-			yin_c_br = char_y -MOVE_PRECISION_PX + 16;
+			yin_c_bl = char_y -MOVE_PRECISION_PX + 5'd16;
+			yin_c_br = char_y -MOVE_PRECISION_PX + 5'd16;
 			
 			
 			
 			end
 		else if(direction_char == DOWN)begin
 			xin_c = char_x;
-			xin_c_tr = char_x + 16;
+			xin_c_tr = char_x + 5'd16;
 			xin_c_bl = char_x;
-			xin_c_br = char_x + 16;
+			xin_c_br = char_x + 5'd16;
 
 			yin_c = char_y +MOVE_PRECISION_PX;
 			yin_c_tr = char_y +MOVE_PRECISION_PX;
-			yin_c_bl = char_y +MOVE_PRECISION_PX + 16;
-			yin_c_br = char_y +MOVE_PRECISION_PX + 16;
+			yin_c_bl = char_y +MOVE_PRECISION_PX + 5'd16;
+			yin_c_br = char_y +MOVE_PRECISION_PX + 5'd16;
 			
 			end
 		else if(direction_char == LEFT)begin
 			xin_c = char_x -MOVE_PRECISION_PX;
-			xin_c_tr = char_x -MOVE_PRECISION_PX+ 16;
+			xin_c_tr = char_x -MOVE_PRECISION_PX+ 5'd16;
 			xin_c_bl = char_x -MOVE_PRECISION_PX;
-			xin_c_br = char_x -MOVE_PRECISION_PX + 16;
+			xin_c_br = char_x -MOVE_PRECISION_PX + 5'd16;
 
 			yin_c = char_y;
 			yin_c_tr = char_y;
-			yin_c_bl = char_y  + 16;
-			yin_c_br = char_y  + 16;
+			yin_c_bl = char_y  + 5'd16;
+			yin_c_br = char_y  + 5'd16;
 			
 			end
 		else if(direction_char == RIGHT)begin
 			xin_c = char_x+MOVE_PRECISION_PX;
-			xin_c_tr = char_x +MOVE_PRECISION_PX+ 16;
+			xin_c_tr = char_x +MOVE_PRECISION_PX+ 5'd16;
 			xin_c_bl = char_x;
-			xin_c_br = char_x +MOVE_PRECISION_PX+ 16;
+			xin_c_br = char_x +MOVE_PRECISION_PX+ 5'd16;
 
 			yin_c = char_y ;
 			yin_c_tr = char_y ;
-			yin_c_bl = char_y  + 16;
-			yin_c_br = char_y  + 16;
+			yin_c_bl = char_y  + 5'd16;
+			yin_c_br = char_y  + 5'd16;
 			
 			end
 	
@@ -244,122 +241,122 @@ module collision_detector(
 		//enemy!!!!!!!!!!!!!!!!!
 
 
-		if(direction_enemy1 == UP)begin
-			xin_e = enemy1_x;
-			xin_e_tr = enemy1_x + 16;
-			xin_e_bl = enemy1_x;
-			xin_e_br = enemy1_x + 16;
+		if(direction_enemy == UP)begin
+			xin_e = enemy_x;
+			xin_e_tr = enemy_x + 5'd16;
+			xin_e_bl = enemy_x;
+			xin_e_br = enemy_x + 5'd16;
 
-			yin_e = enemy1_y -MOVE_PRECISION_PX;
-			yin_e_tr = enemy1_y -MOVE_PRECISION_PX;
-			yin_e_bl = enemy1_y -MOVE_PRECISION_PX + 16;
-			yin_e_br = enemy1_y -MOVE_PRECISION_PX + 16;
+			yin_e = enemy_y -MOVE_PRECISION_PX;
+			yin_e_tr = enemy_y -MOVE_PRECISION_PX;
+			yin_e_bl = enemy_y -MOVE_PRECISION_PX + 5'd16;
+			yin_e_br = enemy_y -MOVE_PRECISION_PX + 5'd16;
 			
 			end
-		else if(direction_enemy1 == DOWN)begin
-			xin_e = enemy1_x;
-			xin_e_tr = enemy1_x + 16;
-			xin_e_bl = enemy1_x;
-			xin_e_br = enemy1_x + 16;
+		else if(direction_enemy == DOWN)begin
+			xin_e = enemy_x;
+			xin_e_tr = enemy_x + 5'd16;
+			xin_e_bl = enemy_x;
+			xin_e_br = enemy_x + 5'd16;
 
-			yin_e = enemy1_y +MOVE_PRECISION_PX;
-			yin_e_tr = enemy1_y +MOVE_PRECISION_PX;
-			yin_e_bl = enemy1_y +MOVE_PRECISION_PX + 16;
-			yin_e_br = enemy1_y +MOVE_PRECISION_PX + 16;
+			yin_e = enemy_y +MOVE_PRECISION_PX;
+			yin_e_tr = enemy_y +MOVE_PRECISION_PX;
+			yin_e_bl = enemy_y +MOVE_PRECISION_PX + 5'd16;
+			yin_e_br = enemy_y +MOVE_PRECISION_PX + 5'd16;
 			
 			end
-		else if(direction_enemy1 == LEFT)begin
-			xin_e = enemy1_x -MOVE_PRECISION_PX;
-			xin_e_tr = enemy1_x -MOVE_PRECISION_PX+ 16;
-			xin_e_bl = enemy1_x -MOVE_PRECISION_PX;
-			xin_e_br = enemy1_x -MOVE_PRECISION_PX + 16;
+		else if(direction_enemy == LEFT)begin
+			xin_e = enemy_x -MOVE_PRECISION_PX;
+			xin_e_tr = enemy_x -MOVE_PRECISION_PX+ 5'd16;
+			xin_e_bl = enemy_x -MOVE_PRECISION_PX;
+			xin_e_br = enemy_x -MOVE_PRECISION_PX + 5'd16;
 			
-			yin_e = enemy1_y;
-			yin_e_tr = enemy1_y;
-			yin_e_bl = enemy1_y  + 16;
-			yin_e_br = enemy1_y  + 16;
+			yin_e = enemy_y;
+			yin_e_tr = enemy_y;
+			yin_e_bl = enemy_y  + 5'd16;
+			yin_e_br = enemy_y  + 5'd16;
 			
 			end
-		else if(direction_enemy1 == RIGHT)begin
-			xin_e = enemy1_x+MOVE_PRECISION_PX;
-			xin_e_tr = enemy1_x +MOVE_PRECISION_PX+ 16;
-			xin_e_bl = enemy1_x;
-			xin_e_br = enemy1_x +MOVE_PRECISION_PX+ 16;
+		else if(direction_enemy == RIGHT)begin
+			xin_e = enemy_x+MOVE_PRECISION_PX;
+			xin_e_tr = enemy_x +MOVE_PRECISION_PX+ 5'd16;
+			xin_e_bl = enemy_x;
+			xin_e_br = enemy_x +MOVE_PRECISION_PX+ 5'd16;
 
-			yin_e = enemy1_y ;
-			yin_e_tr = enemy1_y ;
-			yin_e_bl = enemy1_y  + 16;
-			yin_e_br = enemy1_y  + 16;
+			yin_e = enemy_y ;
+			yin_e_tr = enemy_y ;
+			yin_e_bl = enemy_y  + 5'd16;
+			yin_e_br = enemy_y  + 5'd16;
 			
 			end
 
 		if(attack)begin
 			if(facing_char == UP)begin
-				if((diff_x < 16) &&(enemy1_y+16 - char_y < ATTACK_RANGE) &&(enemy1_y<char_y))
-					e1_hit = ON;
+				if((diff_x < 5'd16) &&(enemy_y+5'd16 - char_y < ATTACK_RANGE) &&(enemy_y<char_y))
+					e_hit = ON;
 				else 
-					e1_hit = OFF;
+					e_hit = OFF;
 			end
 			else if (facing_char == DOWN)begin
-				if((diff_x < 16) &&(char_y+16 -enemy1_y < ATTACK_RANGE)&& (enemy1_y>char_y))
-					e1_hit = ON;
+				if((diff_x < 5'd16) &&(char_y+5'd16 -enemy_y < ATTACK_RANGE)&& (enemy_y>char_y))
+					e_hit = ON;
 				else 
-					e1_hit = OFF;
+					e_hit = OFF;
 			end
 			else if (facing_char == LEFT)begin
-				if((diff_y < 16) &&(char_x-enemy1_x+16  < ATTACK_RANGE) && (enemy1_x<char_x))
-					e1_hit = ON;
+				if((diff_y < 5'd16) &&(char_x-enemy_x+5'd16  < ATTACK_RANGE) && (enemy_x<char_x))
+					e_hit = ON;
 				else 
-					e1_hit = OFF;
+					e_hit = OFF;
 			end
 			else if (facing_char == RIGHT)begin
-				if((diff_y < 16) &&(enemy1_x- char_x+16  < ATTACK_RANGE) && (enemy1_x>char_x))
-					e1_hit = ON;
+				if((diff_y < 5'd16) &&(enemy_x- char_x+5'd16  < ATTACK_RANGE) && (enemy_x>char_x))
+					e_hit = ON;
 				else 
-					e1_hit = OFF;
+					e_hit = OFF;
 			end
 			else
-				e1_hit = OFF;
+				e_hit = OFF;
 
 		end
 
-		if( ((char_y ==0) && (direction_char == UP))||((char_x == 0) && (direction_char == LEFT)) || (((char_x+16) == 256) &&(direction_char == RIGHT)) || (((char_y+16) == 176) &&(direction_char == DOWN))  )
+		if( ((char_y ==0) && (direction_char == UP))||((char_x == 0) && (direction_char == LEFT)) || (((char_x+5'd16) == 255) &&(direction_char == RIGHT)) || (((char_y+5'd16) == 175) &&(direction_char == DOWN))  )
 			exception_c = ON;
 		else 
 			exception_c = OFF;
 			
-		if(((enemy1_y ==0) && (direction_enemy1 == UP))||((enemy1_x == 0) && (direction_enemy1 == LEFT))|| (((enemy1_x+16) == 256) &&(direction_enemy1 == RIGHT)) || (((enemy1_y+16) == 176) &&(direction_enemy1 == DOWN)) )
+		if(((enemy_y ==0) && (direction_enemy == UP))||((enemy_x == 0) && (direction_enemy == LEFT))|| (((enemy_x+5'd16) == 255) &&(direction_enemy == RIGHT)) || (((enemy_y+5'd16) == 175) &&(direction_enemy == DOWN)) )
 			exception_e = ON;
 		else 
 			exception_e = OFF;
-		//if(collision_enable&& ((diff_x <16&& diff_y < 16) || !(&{col_e,col_e_tr, col_e_bl, col_e_br}) || !(&{col_c,col_c_tr, col_c_bl, col_c_br})) ) begin
+		//if(collision_enable&& ((diff_x <5'd16&& diff_y < 5'd16) || !(&{col_e,col_e_tr, col_e_bl, col_e_br}) || !(&{col_c,col_c_tr, col_c_bl, col_c_br})) ) begin
 				if(collision_enable && (({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || ({col_c,col_c_tr, col_c_bl, col_c_br}!= 4'b1111) || (exception_c) || (exception_e)))begin
 				
-				c_e1_collision = OFF;
-				e1_map_collision = OFF;
+				c_e_collision = OFF;
+				e_map_collision = OFF;
 				c_map_collision = OFF;
 			//if(!(&{col_e,col_e_tr, col_e_bl, col_e_br})) begin
 				if(({col_e,col_e_tr, col_e_bl, col_e_br} != 4'b1111) || exception_e)begin
-				e1_map_collision = ON;
-				//facing_e_out = direction_enemy1;
+				e_map_collision = ON;
+				//facing_e_out = direction_enemy;
 			end
 			//if (!(&{col_c,col_c_tr, col_c_bl, col_c_br})) begin
 			if(({col_c,col_c_tr, col_c_bl, col_c_br}!= 4'b1111) || exception_c)begin
 				c_map_collision = ON;
 				//facing_c_out = direction_char;
 			end
-			if((diff_x <16)&& (diff_y < 16)) begin
-				c_e1_collision = ON;
+			if((diff_x <5'd16)&& (diff_y < 5'd16)) begin
+				c_e_collision = ON;
 			end
 
 		end
 
 		else if (collision_enable)begin
-			c_e1_collision = OFF;
-			e1_map_collision = OFF;
+			c_e_collision = OFF;
+			e_map_collision = OFF;
 			c_map_collision = OFF;
 		end
-		testRom = {col_e, col_e_tr, col_e_bl, col_e_br, col_c,col_c_tr, col_c_bl, col_c_br};
+		// testRom = {col_e, col_e_tr, col_e_bl, col_e_br, col_c,col_c_tr, col_c_bl, col_c_br};
 
 	end
 	

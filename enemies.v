@@ -162,7 +162,7 @@ module enemies(
 
 		.draw_done			(draw_done_3));
 	defparam enemy_3.X_INITIAL = 8'd111,
-				enemy_3.Y_INITIAL = 8'd15;
+				enemy_3.Y_INITIAL = 8'd159;
 
 	/** combinational logic **/
 	always@(*)
@@ -173,6 +173,14 @@ module enemies(
 			draw_2 = OFF;
 			draw_3 = OFF;
 		end
+		
+		else if(init)
+		begin
+			draw_1 = OFF;
+			draw_2 = OFF;
+			draw_3 = OFF;
+		end
+		
 		else if(draw)
 		begin
 			//start drawing enemy 1 when draw signal is on

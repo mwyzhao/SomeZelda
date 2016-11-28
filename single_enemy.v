@@ -29,7 +29,6 @@ module single_enemy(
 
 	//enemy direction data for collision_detector
 	output reg 	[2:0] direction,
-	output reg 	[2:0] facing,
 
 	//memory output data for VGA
 	output 		[5:0] colour,
@@ -108,7 +107,6 @@ module single_enemy(
 			y_pos			<= Y_INITIAL;
 			count			<= 6'b0;
 			move_count	<= 4'b0;
-			facing		<= DOWN;
 			draw_done	<= OFF;
 		end
 		else if(init)
@@ -120,14 +118,13 @@ module single_enemy(
 			y_pos			<= Y_INITIAL;
 			count			<= 6'b0;
 			move_count	<= 4'b0;
-			facing		<= DOWN;
 			draw_done	<= OFF;
 		end
 		
 		//will take in new move every 16 cycles
 		//move_count can be incremented in any state that runs every cycle
 		//will incrememnt move_count in apply_move
-		else if(gen_move & (move_count == 4'b0000))
+		else if(gen_move && (move_count == 4'b0000))
 		begin
 			//this is for some added unpredictability in enemy movements
 			//only triggers when random numbers match 11, EV 1/8
@@ -168,7 +165,6 @@ module single_enemy(
 				begin
 					y_pos 	<= y_pos - 1'b1;
 				end
-				facing		<= UP;
 				intAddress	<= 6'd32;
 			end
 			else if(direction == DOWN)
@@ -178,7 +174,6 @@ module single_enemy(
 				begin
 					y_pos		<= y_pos + 1'b1;
 				end
-				facing		<= DOWN;
 				intAddress	<= 6'd0;
 			end
 			else if(direction == LEFT)
@@ -188,7 +183,6 @@ module single_enemy(
 				begin
 					x_pos		<= x_pos - 1'b1;
 				end
-				facing		<= LEFT;
 				intAddress	<= 6'd16;
 			end
 			else if(direction == RIGHT)
@@ -198,7 +192,6 @@ module single_enemy(
 				begin
 					x_pos		<= x_pos + 1'b1;
 				end
-				facing 		<= RIGHT;
 				intAddress	<= 6'd48;
 			end
 		end

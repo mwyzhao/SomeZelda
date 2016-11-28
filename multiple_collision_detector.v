@@ -16,17 +16,14 @@ module multiple_collision_detector(
 	input		[8:0] enemy1_x,
 	input		[7:0] enemy1_y,
 	input 		[2:0] direction_enemy1,
-	input 		[2:0] facing_enemy1,
 
 	input		[8:0] enemy2_x,
 	input		[7:0] enemy2_y,
 	input 		[2:0] direction_enemy2,
-	input 		[2:0] facing_enemy2,
 
 	input		[8:0] enemy3_x,
 	input		[7:0] enemy3_y,
 	input 		[2:0] direction_enemy3,
-	input 		[2:0] facing_enemy3,
 
 	/* output signals indicating if any collisions have occurred
 	 * set to 1 if true, 0 if false */
@@ -47,9 +44,10 @@ module multiple_collision_detector(
 	output	c_e3_collision,
 	output  e3_hit,
 	
-	output	done,
+	output	done
 	);
 
+	wire done1, done2, done3;
 	assign done = done1&done2&done3;
 
 	collision_detector c1(.clock(clock),
@@ -64,7 +62,6 @@ module multiple_collision_detector(
 						  .enemy_x(enemy1_x),
 						  .enemy_y(enemy1_y),
 						  .direction_enemy(direction_enemy1),
-						  .facing_enemy(facing_enemy1),
 						  .c_map_collision(c_map_collision),
 						  .e_map_collision(e1_map_collision),
 						  .c_e_collision(c_e1_collision),
@@ -83,7 +80,6 @@ module multiple_collision_detector(
 						  .enemy_x(enemy2_x),
 						  .enemy_y(enemy2_y),
 						  .direction_enemy(direction_enemy2),
-						  .facing_enemy(facing_enemy2),
 						  //.c_map_collision(c_map_collision),
 						  .e_map_collision(e2_map_collision),
 						  .c_e_collision(c_e2_collision),
@@ -102,7 +98,6 @@ module multiple_collision_detector(
 						  .enemy_x(enemy3_x),
 						  .enemy_y(enemy3_y),
 						  .direction_enemy(direction_enemy3),
-						  .facing_enemy(facing_enemy3),
 						  //.c_map_collision(c_map_collision),
 						  .e_map_collision(e3_map_collision),
 						  .c_e_collision(c_e3_collision),

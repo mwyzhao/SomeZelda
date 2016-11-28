@@ -19,7 +19,7 @@ module link_char(
 	input 			draw,
 
 	//collision signal from collision_detector
-	input 		[1:0] collision,
+	input 		[3:0] collision,
 
 	//link position for collision_detector and vga
 	output reg 	[8:0] x_pos,
@@ -69,9 +69,9 @@ module link_char(
 
 	/** registers and wires **/
 	reg [5:0] spriteAddressX;
-	reg [3:0] spriteAddressY;
+	reg [5:0] spriteAddressY;
 	reg [5:0] intAddressX;
-	reg [5:0] intAddressY
+	reg [5:0] intAddressY;
 	wire [11:0]spriteMemAddress;
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
@@ -128,7 +128,7 @@ module link_char(
 		else if(apply_action)
 		begin
 			
-			else if(direction == ATTACK)
+			if(direction == ATTACK)
 			begin
 				if(facing == UP)begin
 					intAddressX <=48;
@@ -147,6 +147,25 @@ module link_char(
 					intAddressY <=32;
 				end
 
+			end
+			else begin
+				if (facing == UP) begin
+					intAddressX <= 32;
+					intAddressY <= 0;
+				end
+				else if (facing == DOWN) begin
+					intAddressX <= 0;
+					intAddressY <= 0;
+				end
+				else if (facing == LEFT) begin
+					intAddressX <= 16;
+					intAddressY <= 0;
+				end
+				else if (facing == RIGHT) begin
+					intAddressX <= 48;
+					intAddressY <= 0;
+				end
+				
 			end
 			
 			if(direction == UP)
@@ -260,7 +279,7 @@ module link_char(
 			atkCount 		<= atkCount + 1'b1;
 
 			//once counter reaches max, drawing done
-			if(count == MAX_ATK_COUNT)
+			if(atkCount == MAX_ATK_COUNT)
 			begin
 				//set write enable to off and reset counter
 				atkCount 		<= 9'b0;
