@@ -1,4 +1,4 @@
-multiple_collision_detector(
+module multiple_collision_detector(
 	input clock,
 	input reset,
 	input init,
