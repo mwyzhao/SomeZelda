@@ -7,6 +7,7 @@ module control(
 	input			idle_done, 			//FRAME DONE SIGNAL				FROM DATAPATH
 	//input 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FROM DATAPATH
 	input 		check_collide_done, //COLLIDE DONE SIGNAL 			FROM DATAPATH
+	input			gen_move_done,
 	input			draw_map_done,		//DRAW DONE SIGNAL				FROM DATAPATH
 	input 			draw_link_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
 	input 			draw_enemies_done, 	//DRAW DONE SIGNAL 				FROM DATAPATH
@@ -48,7 +49,7 @@ module control(
 		case(current_state)
 			S_INIT: 				next_state = S_DRAW_MAP;
 			S_IDLE:					next_state = idle_done ? S_GEN_MOVEMENT : S_IDLE;
-			S_GEN_MOVEMENT: 		next_state = S_CHECK_COLLIDE;
+			S_GEN_MOVEMENT: 		next_state = gen_move_done ? S_CHECK_COLLIDE : S_GEN_MOVEMENT;
 			S_CHECK_COLLIDE:	 	next_state = check_collide_done? S_LINK_ACTION : S_CHECK_COLLIDE;
 			S_LINK_ACTION:			next_state = S_MOVE_ENEMIES;
 			S_MOVE_ENEMIES: 		next_state = S_DRAW_MAP;

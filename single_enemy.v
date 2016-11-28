@@ -88,6 +88,9 @@ module single_enemy(
 
 	//counter for gridlocking enemy to 16 pixel wide movements
 	reg	[3:0] move_count;
+	
+	//counter for lowering movement speed
+	reg 	[3:0] apply_count;
 
 	//enemy status register
 	reg	ded;
@@ -107,6 +110,7 @@ module single_enemy(
 			y_pos			<= Y_INITIAL;
 			count			<= 6'b0;
 			move_count	<= 4'b0;
+			apply_count	<= 4'b0;
 			draw_done	<= OFF;
 		end
 		else if(init)
@@ -118,6 +122,7 @@ module single_enemy(
 			y_pos			<= Y_INITIAL;
 			count			<= 6'b0;
 			move_count	<= 4'b0;
+			apply_count	<= 4'b0;
 			draw_done	<= OFF;
 		end
 		
@@ -155,51 +160,56 @@ module single_enemy(
 
 		else if(apply_move)
 		begin
-			//increment move_count here
-			move_count <= move_count + 1'b1;
-
-			if(direction == UP)
+			//increment apply and only apply move every 16 cycles
+			apply_count	<= apply_count + 1'b1;
+			
+			if(apply_count == 4'b0000)
 			begin
-				//pull from move up sprites
-				if(!collision)
+				//increment direction change every 16 moves
+				move_count <= move_count + 1'b1;
+				
+				//check directions
+				if(direction == UP)
 				begin
-					y_pos 	<= y_pos - 1'b1;
+					//pull from move up sprites
+					if(!collision)
+					begin
+						y_pos 	<= y_pos - 1'b1;
+					end
+					intAddress	<= 6'd32;
 				end
-				intAddress	<= 6'd32;
-			end
-			else if(direction == DOWN)
-			begin
-				//pull from move down sprites
-				if(!collision)
+				else if(direction == DOWN)
 				begin
-					y_pos		<= y_pos + 1'b1;
+					//pull from move down sprites
+					if(!collision)
+					begin
+						y_pos		<= y_pos + 1'b1;
+					end
+					intAddress	<= 6'd0;
 				end
-				intAddress	<= 6'd0;
-			end
-			else if(direction == LEFT)
-			begin
-				//pull from move left sprites
-				if(!collision)
+				else if(direction == LEFT)
 				begin
-					x_pos		<= x_pos - 1'b1;
+					//pull from move left sprites
+					if(!collision)
+					begin
+						x_pos		<= x_pos - 1'b1;
+					end
+					intAddress	<= 6'd16;
 				end
-				intAddress	<= 6'd16;
-			end
-			else if(direction == RIGHT)
-			begin
-				//pull from move right sprites
-				if(!collision)
+				else if(direction == RIGHT)
 				begin
-					x_pos		<= x_pos + 1'b1;
+					//pull from move right sprites
+					if(!collision)
+					begin
+						x_pos		<= x_pos + 1'b1;
+					end
+					intAddress	<= 6'd48;
 				end
-				intAddress	<= 6'd48;
 			end
 		end
 
 		else if(draw)
 		begin
-
-
 			spriteAddressX <= intAddress + count[3:0];
 			spriteAddressY <= count[7:4];
 			//increment x and y positions

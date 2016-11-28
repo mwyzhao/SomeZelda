@@ -76,7 +76,12 @@ module link_char(
 	/** position registers for player character link **/
 	//counter for when link is finished drawing
 	reg 	[7:0] count;
+	//counter for when link attack sprite is finished drawing
 	reg 	[8:0] atkCount;
+	
+	//counter for lowering movement speed
+	reg 	[3:0] apply_count;
+	
 	assign VGA_write = (draw) && (colour != 6'b111111);
 
 	//sequential logic
@@ -91,6 +96,7 @@ module link_char(
 			y_pos 	<= 8'd96;
 			count 	 	<= 8'b0;
 			atkCount <= 9'b0;
+			apply_count <= 4'b0;
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
@@ -104,6 +110,7 @@ module link_char(
 			y_pos	<= 8'd96;
 			count  		<= 8'b0;
 			atkCount <= 9'b0;
+			apply_count <= 4'b0;
 			facing <= DOWN;
 			direction <= NO_ACTION;
 			draw_done 	<= OFF;
@@ -127,90 +134,95 @@ module link_char(
 
 		else if(apply_action)
 		begin
+			//increment apply_count here
+			apply_count <= apply_count + 1'b1;
 			
-			if(direction == ATTACK)
+			if(apply_count == 4'b0000)
 			begin
-				if(facing == UP)begin
-					intAddressX <=48;
-					intAddressY <=16;
-				end
-				else if(facing == DOWN)begin
-					intAddressX <=0;
-					intAddressY <=16;
-				end
-				else if(facing == LEFT)begin
-					intAddressX <=16;
-					intAddressY <=16;
-				end
-				else if(facing == RIGHT)begin
-					intAddressX <=16;
-					intAddressY <=32;
-				end
+				if(direction == ATTACK)
+				begin
+					if(facing == UP)begin
+						intAddressX <=48;
+						intAddressY <=16;
+					end
+					else if(facing == DOWN)begin
+						intAddressX <=0;
+						intAddressY <=16;
+					end
+					else if(facing == LEFT)begin
+						intAddressX <=16;
+						intAddressY <=16;
+					end
+					else if(facing == RIGHT)begin
+						intAddressX <=16;
+						intAddressY <=32;
+					end
 
-			end
-			else begin
-				if (facing == UP) begin
+				end
+				else begin
+					if (facing == UP) begin
+						intAddressX <= 32;
+						intAddressY <= 0;
+					end
+					else if (facing == DOWN) begin
+						intAddressX <= 0;
+						intAddressY <= 0;
+					end
+					else if (facing == LEFT) begin
+						intAddressX <= 16;
+						intAddressY <= 0;
+					end
+					else if (facing == RIGHT) begin
+						intAddressX <= 48;
+						intAddressY <= 0;
+					end
+					
+				end
+				
+				if(direction == UP)
+				begin
+					//pull from move up sprites
+					if(!collision[0])
+					begin
+						y_pos 	<= y_pos - 1'b1;
+					end
+					facing <= UP;
 					intAddressX <= 32;
 					intAddressY <= 0;
 				end
-				else if (facing == DOWN) begin
+				else if(direction == DOWN)
+				begin
+					//pull from move down sprites
+					if(!collision[0])
+					begin
+						y_pos 	<= y_pos + 1'b1;
+					end
+					facing	<= DOWN;
 					intAddressX <= 0;
 					intAddressY <= 0;
 				end
-				else if (facing == LEFT) begin
+				else if(direction == LEFT)
+				begin
+					//pull from move left sprites
+					if(!collision[0])
+					begin
+						x_pos	<= x_pos - 1'b1;
+					end
+					facing <= LEFT;
 					intAddressX <= 16;
 					intAddressY <= 0;
 				end
-				else if (facing == RIGHT) begin
+				else if(direction == RIGHT)
+				begin
+					//pull from move right sprites
+					if(!collision[0])
+					begin
+						x_pos	<= x_pos + 1'b1;
+					end
+					facing <= RIGHT;
 					intAddressX <= 48;
 					intAddressY <= 0;
 				end
-				
-			end
-			
-			if(direction == UP)
-			begin
-				//pull from move up sprites
-				if(!collision[0])
-				begin
-					y_pos 	<= y_pos - 1'b1;
-				end
-				facing <= UP;
-				intAddressX <= 32;
-				intAddressY <= 0;
-			end
-			else if(direction == DOWN)
-			begin
-				//pull from move down sprites
-				if(!collision[0])
-				begin
-					y_pos 	<= y_pos + 1'b1;
-				end
-				facing	<= DOWN;
-				intAddressX <= 0;
-				intAddressY <= 0;
-			end
-			else if(direction == LEFT)
-			begin
-				//pull from move left sprites
-				if(!collision[0])
-				begin
-					x_pos	<= x_pos - 1'b1;
-				end
-				facing <= LEFT;
-				intAddressX <= 16;
-				intAddressY <= 0;
-			end
-			else if(direction == RIGHT)
-			begin
-				//pull from move right sprites
-				if(!collision[0])
-				begin
-					x_pos	<= x_pos + 1'b1;
-				end
-				facing <= RIGHT;
-				intAddressX <= 48;
-				intAddressY <= 0;
 			end
 		end
 

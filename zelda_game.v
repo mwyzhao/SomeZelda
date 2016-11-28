@@ -28,7 +28,7 @@ module zelda_game
 	// Declare your inputs and outputs here
 	input 	[9:0] SW;
 	input 	[3:0] KEY;
-	output 	[3:0] LEDR;
+	output 	[9:0] LEDR;
 	output 	[6:0] HEX0;
 	output	[6:0] HEX1;
 	output 	[6:0] HEX2;
@@ -65,6 +65,9 @@ module zelda_game
 	wire 		[8:0] x;
 	wire 		[7:0] y;
 	wire 		writeEn;
+	
+	assign LEDR[9] = writeEn;
+	assign LEDR[8] = draw_enemies_done;
 
 	// Create an Instance of a VGA controller - there can be only one!
 	// Define the number of colours as well as the initial background
@@ -97,7 +100,12 @@ module zelda_game
 	wire apply_act_link, move_enemies;
 	wire draw_map, draw_link, draw_enemies;
 	
-	wire idle_done, check_collide_done, draw_map_done, draw_link_done, draw_enemies_done;
+	wire idle_done, gen_move_done, check_collide_done, draw_map_done, draw_link_done, draw_enemies_done;
+	
+	//delete these late
+	wire [7:0] enemy_1_x_pos;
+	wire [7:0] enemy_2_x_pos;
+	wire [7:0] enemy_3_x_pos;
 
 	control C(
 		//inputs
@@ -107,12 +115,13 @@ module zelda_game
 		.idle_done			(idle_done),
 		//.gen_move_done		(gen_move_done),
 		.check_collide_done	(check_collide_done),
+		.gen_move_done			(gen_move_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done 	(draw_link_done),
 		.draw_enemies_done(draw_enemies_done),
 		
 		//outputs
-		.states 				(LEDR),
+		.states 				(LEDR[3:0]),
 		
 		.init					(init),
 		.idle 				(idle),
@@ -124,21 +133,29 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies));
 	
-//	hexDecoder Hx1(
-//		.bin(link_x_pos[7:4]),
-//		.hout(HEX5));
-//	
-//	hexDecoder Hx2(
-//		.bin(link_x_pos[3:0]),
-//		.hout(HEX4));
-//	
-//	hexDecoder Hy1(
-//		.bin(link_y_pos[7:4]),
-//		.hout(HEX3));
-//		
-//	hexDecoder Hy2(
-//		.bin(link_y_pos[3:0]),
-//		.hout(HEX2));
+	hexDecoder e1x1(
+		.bin(enemy_3_x_pos[7:4]),
+		.hout(HEX5));
+	
+	hexDecoder e1x2(
+		.bin(enemy_3_x_pos[3:0]),
+		.hout(HEX4));
+	
+	hexDecoder e2x1(
+		.bin(enemy_2_x_pos[7:4]),
+		.hout(HEX3));
+		
+	hexDecoder e2x2(
+		.bin(enemy_2_x_pos[3:0]),
+		.hout(HEX2));
+		
+	hexDecoder e3x1(
+		.bin(enemy_1_x_pos[7:4]),
+		.hout(HEX1));
+		
+	hexDecoder e3x2(
+		.bin(enemy_1_x_pos[3:0]),
+		.hout(HEX0));
 	
 	// hex_decoder h1(
 	// 	.data(enemy_c),
@@ -169,6 +186,13 @@ module zelda_game
 		.draw_link			(draw_link),
 		.draw_enemies		(draw_enemies),
 
+		.enemy_1_x_pos(enemy_1_x_pos),
+		.enemy_1_y_pos(enemy_1_y_pos),
+		.enemy_2_x_pos(enemy_2_x_pos),
+		.enemy_2_y_pos(enemy_2_y_pos),
+		.enemy_3_x_pos(enemy_3_x_pos),
+		.enemy_3_y_pos(enemy_3_y_pos),
+		
 		//outputs
 		.x_position			(x),
 		.y_position			(y),
@@ -176,6 +200,7 @@ module zelda_game
 		.VGA_enable 		(writeEn),
 
 		.idle_done			(idle_done),
+		.gen_move_done		(gen_move_done),
 		.check_collide_done(check_collide_done),
 		.draw_map_done		(draw_map_done),
 		.draw_link_done	(draw_link_done),

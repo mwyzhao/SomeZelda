@@ -20,6 +20,13 @@ module datapath(
 	input 			draw_link, 			//DRAW LINK SIGNAL 				FROM CONTROL
 	input 			draw_enemies, 		//DRAW ENEMY SIGNAL 			FROM CONTROL
 	
+	output [8:0] enemy_1_x_pos,
+	output [7:0] enemy_1_y_pos,
+	output [8:0] enemy_2_x_pos,
+	output [7:0] enemy_2_y_pos,
+	output [8:0] enemy_3_x_pos,
+	output [7:0] enemy_3_y_pos,
+	
 	output reg		[8:0] x_position,	//POSITION CORRDINATE X 		FOR VGA
 	output reg		[7:0] y_position,	//POSITION COORDINATE Y			FOR VGA
 	output reg		[5:0] colour, 		//DATA TO BE WRITTEN TO MEMORY 	FOR VGA
@@ -27,7 +34,7 @@ module datapath(
 
 	//probably don't need the commented out signals
 	output reg		idle_done,			//IDLE DONE SIGNAL				FOR CONTROL
-	//output 		gen_move_done, 		//MOVEMENT DONE SIGNAL 			FOR CONTROL
+	output			gen_move_done,
 	output 			check_collide_done, //COLLIDE DONE SIGNAL 			FOR CONTROL
 	output 		  	draw_map_done,		//DRAW DONE SIGNAL				FOR CONTROL
 	output 			draw_link_done, 		//DRAW DONE SIGNAL 				FOR CONTROL
@@ -37,7 +44,7 @@ module datapath(
 	);
 	
 	/** parameters **/
-	parameter 	MAX_FRAME_COUNT = 24'd10000000, 	//count for for 30 fps 50MHz/30
+	parameter 	MAX_FRAME_COUNT = 28'd1, 	//count for for 30 fps 50MHz/30
 					//action parameters
 					NO_ACTION 		= 3'b000,
 					ATTACK 			= 3'b001,
@@ -54,7 +61,6 @@ module datapath(
 	wire [8:0] map_x_draw;
 	wire [7:0] map_y_draw;
 	wire [5:0] map_colour;
-	wire map_draw_done;
 	wire map_write;
 
 	//character signal wires
@@ -67,15 +73,14 @@ module datapath(
 	wire [3:0] link_collision;
 	wire [5:0] link_colour;
 	wire link_write;
-	wire link_draw_done;
 
 	//enemy signal wires
-	wire [8:0] enemy_1_x_pos;
-	wire [7:0] enemy_1_y_pos;
-	wire [8:0] enemy_2_x_pos;
-	wire [7:0] enemy_2_y_pos;
-	wire [8:0] enemy_3_x_pos;
-	wire [7:0] enemy_3_y_pos;
+//	wire [8:0] enemy_1_x_pos;
+//	wire [7:0] enemy_1_y_pos;
+//	wire [8:0] enemy_2_x_pos;
+//	wire [7:0] enemy_2_y_pos;
+//	wire [8:0] enemy_3_x_pos;
+//	wire [7:0] enemy_3_y_pos;
 	wire [8:0] enemy_x_draw;
 	wire [7:0] enemy_y_draw;
 	wire [2:0] enemy_1_direction;
@@ -90,13 +95,12 @@ module datapath(
 	wire [2:0] enemy_collision;
 	wire [5:0] enemy_colour;
 	wire enemy_write;
-	wire enemy_draw_done;
 
-	wire e1_hit;
+	assign enemy_collision = {enemy3_collision,enemy2_collision,enemy1_collision};
 
 	//frame counter limits actions to 50Hz
-	//21 bits for overflow safety
-	reg  [23:0] frame_counter;
+	//24	bits for overflow safety
+	reg  [27:0] frame_counter;
 
 	/** module declarations go here **/
 	map M(
@@ -105,9 +109,6 @@ module datapath(
 
 		//enable signal
 		.enable 		(draw_map),
-
-		//map select
-		//.map_s 		(map_s),
 
 		//output x,y coord
 		.x_pos 			(map_x_draw),
@@ -165,143 +166,95 @@ module datapath(
 
 		//link output finished signal
 		.draw_done 		(draw_link_done));
-
-	single_enemy enemy_1(
-		.clock	(clock),
-		.reset	(reset),
 		
-		.init					(init),
-		.idle					(idle),
-		.gen_move			(gen_move),
-		.apply_move			(move_enemies),
-		.draw					(draw_enemies),
+	enemies blob_things(
+		.clock 			(clock),
+		.reset 			(reset),
 
-		.collision			(enemy1_collision),
+		//state signals
+		.init 			(init),
+		.idle 			(idle),
+		.gen_move 		(gen_move),
+		.apply_move		(move_enemies),
+		.draw				(draw_enemies),
 
-		.link_x_pos			(link_x_pos),
-		.link_y_pos			(link_y_pos),
+		//collision signal
+		.collision 		(enemy_collision),
 
-		.x_pos				(enemy_1_x_pos),
-		.y_pos				(enemy_1_y_pos),
-		.x_draw				(enemy_x_draw),
-		.y_draw				(enemy_y_draw),
-
-		.direction			(enemy_1_direction),
-
-		.colour				(enemy_colour),
-
-		.VGA_write			(enemy_write),
-
-		.draw_done			(draw_enemies_done));
-	//using default x, y values
-
+		//link position coordinates for movement
+		.link_x_pos		(link_x_pos),
+		.link_y_pos		(link_y_pos),
 		
-//	enemies blob_things(
-//		.clock 			(clock),
-//		.reset 			(reset),
-//
-//		//state signals
-//		.init 			(init),
-//		.idle 			(idle),
-//		.gen_move 		(gen_move),
-//		.apply_move		(move_enemies),
-//		.draw			(draw_enemies),
-//
-//		//collision signal
-//		.collision 		(enemy_collision),
-//
-//		//link position coordinates for movement
-//		.link_x_pos		(link_x_pos),
-//		.link_y_pos		(link_y_pos),
-//
-//		//enemy position coordinates
-//		.enemy_1_x_pos 			(enemy_1_x_pos),
-//		.enemy_1_y_pos 			(enemy_1_y_pos),
-//
-//		.enemy_2_x_pos 			(enemy_2_x_pos),
-//		.enemy_2_y_pos 			(enemy_2_y_pos),
-//
-//		.enemy_3_x_pos 			(enemy_3_x_pos),
-//		.enemy_3_y_pos 			(enemy_3_y_pos),
-//		
-//		.x_draw 						(enemy_x_draw),
-//		.y_draw 						(enemy_y_draw),
-//
-//		//enemy direction information
-//		.enemy_1_direction		(enemy_1_direction),
-//		.enemy_2_direction		(enemy_2_direction),
-//		.enemy_3_direction		(enemy_3_direction),
-//
-//		//data to load into VGA
-//		.colour	 					(enemy_colour),
-//
-//		.VGA_write 					(enemy_write),
-//
-//		.draw_done 					(draw_enemies_done));
+		.gen_move_done	(gen_move_done),
+
+		//enemy position coordinates
+		.enemy_1_x_pos 			(enemy_1_x_pos),
+		.enemy_1_y_pos 			(enemy_1_y_pos),
+
+		.enemy_2_x_pos 			(enemy_2_x_pos),
+		.enemy_2_y_pos 			(enemy_2_y_pos),
+
+		.enemy_3_x_pos 			(enemy_3_x_pos),
+		.enemy_3_y_pos 			(enemy_3_y_pos),
+		
+		.x_draw 						(enemy_x_draw),
+		.y_draw 						(enemy_y_draw),
+
+		//enemy direction information
+		.enemy_1_direction		(enemy_1_direction),
+		.enemy_2_direction		(enemy_2_direction),
+		.enemy_3_direction		(enemy_3_direction),
+
+		//data to load into VGA
+		.colour	 					(enemy_colour),
+
+		.VGA_write 					(enemy_write),
+
+		.draw_done 					(draw_enemies_done));
 	
-	collision_detector c1(.clock(clock),
-						  .reset(reset),
-						  .init(init),
-						  .collision_enable(check_collide),
-						  .char_x(link_x_pos),
-						  .char_y(link_y_pos),
-						  .direction_char(link_direction),
-						  .facing_char(link_facing),
-						  .attack((link_direction==ATTACK)),
-						  .enemy_x(enemy_1_x_pos),
-						  .enemy_y(enemy_1_y_pos),
-						  .direction_enemy(enemy_1_direction),
-						  .c_map_collision(link_collision[0]),
-						  .e_map_collision(enemy1_collision),
-						  .c_e_collision(link_collision[1]),
-						  .e_hit(e1_hit),
-						  .done(check_collide_done)
-						  );
-	
-//	multiple_collision_detector multi_cd(
-//		.clock 					(clock),
-//		.reset 					(reset),
-//		.init 					(init),
-//
-//		//enable signal for calculations
-//		.collision_enable 	(check_collide),
-//
-//		//input position coord for collision calculation
-//		.char_x 					(link_x_pos),
-//		.char_y	 				(link_y_pos),
-//		.direction_char		(link_direction),
-//		.facing_char			(link_facing),
-//		.attack 					((link_direction == ATTACK)),
-//
-//		.enemy1_x 				(enemy_1_x_pos),
-//		.enemy1_y 				(enemy_1_y_pos),
-//		.direction_enemy1		(enemy_1_direction),
-//			
-//		.enemy2_x 				(enemy_2_x_pos),
-//		.enemy2_y 				(enemy_2_y_pos),
-//		.direction_enemy2		(enemy_2_direction),
-//		
-//
-//		.enemy3_x 				(enemy_3_x_pos),
-//		.enemy3_y 				(enemy_3_y_pos),
-//		.direction_enemy3		(enemy_3_direction),
-//
-//		//output collision true,false signals
-//		.c_map_collision		(link_collision[0]),
-//		.c_e1_collision 		(link_collision[1]),
-//		.c_e2_collision 		(link_collision[2]),
-//		.c_e3_collision 		(link_collision[3]),
-//
-////		.e1_map_collision 	(enemy1_collision),
-////		.e2_map_collision 	(enemy2_collision),
-////		.e3_map_collision 	(enemy3_collision),
-//
-//		.e1_hit					(e1_hit),
-//		.e2_hit					(e2_hit),
-//		.e3_hit					(e3_hit),
-//		
-//		.done 					(check_collide_done));
-//		// .testRom 				(testRom));
+	multiple_collision_detector multi_cd(
+		.clock 					(clock),
+		.reset 					(reset),
+		.init 					(init),
+
+		//enable signal for calculations
+		.collision_enable 	(check_collide),
+
+		//input position coord for collision calculation
+		.char_x 					(link_x_pos),
+		.char_y	 				(link_y_pos),
+		.direction_char		(link_direction),
+		.facing_char			(link_facing),
+		.attack 					((link_direction == ATTACK)),
+
+		.enemy1_x 				(enemy_1_x_pos),
+		.enemy1_y 				(enemy_1_y_pos),
+		.direction_enemy1		(enemy_1_direction),
+			
+		.enemy2_x 				(enemy_2_x_pos),
+		.enemy2_y 				(enemy_2_y_pos),
+		.direction_enemy2		(enemy_2_direction),
+		
+
+		.enemy3_x 				(enemy_3_x_pos),
+		.enemy3_y 				(enemy_3_y_pos),
+		.direction_enemy3		(enemy_3_direction),
+
+		//output collision true,false signals
+		.c_map_collision		(link_collision[0]),
+		.c_e1_collision 		(link_collision[1]),
+		.c_e2_collision 		(link_collision[2]),
+		.c_e3_collision 		(link_collision[3]),
+
+		.e1_map_collision 	(enemy1_collision),
+		.e2_map_collision 	(enemy2_collision),
+		.e3_map_collision 	(enemy3_collision),
+
+		.e1_hit					(e1_hit),
+		.e2_hit					(e2_hit),
+		.e3_hit					(e3_hit),
+		
+		.done 					(check_collide_done));
 
 	/** combinational logic **/
 	always@(*)
@@ -353,21 +306,21 @@ module datapath(
 		end
 	end
 
-	//sequential logic
+	//sequential logic :'(
 	always@(posedge clock)
 	begin
 		//synchronous reset
 		if(reset)
 		begin
 			idle_done 		<= OFF;
-			frame_counter 	<= 24'b0;
+			frame_counter 	<= 28'b0;
 		end
 
 		//initialize registers
 		else if(init)
 		begin
 			idle_done 		<= OFF;
-			frame_counter 	<= 24'b0;
+			frame_counter 	<= 28'b0;
 		end
 
 		//once idle state is reached, 
@@ -377,7 +330,7 @@ module datapath(
 			if(frame_counter > MAX_FRAME_COUNT)
 			begin
 				idle_done 		<= ON;
-				frame_counter 	<= 24'b0;
+				frame_counter 	<= 28'b0;
 			end
 		end
 		//if out of idle state reset idle_done
