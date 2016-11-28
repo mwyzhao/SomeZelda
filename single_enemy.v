@@ -127,7 +127,7 @@ module single_enemy(
 		//will take in new move every 16 cycles
 		//move_count can be incremented in any state that runs every cycle
 		//will incrememnt move_count in apply_move
-		else if(gen_move & (move_count != 4'b1111))
+		else if(gen_move & (move_count == 4'b0000))
 		begin
 			//this is for some added unpredictability in enemy movements
 			//only triggers when random numbers match 11, EV 1/8
